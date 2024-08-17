@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CheckInOut2.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="CheckInOut2.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CheckInOut2">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="100, *" RowDefinitions="*">
+        <ScrollViewer Grid.Column="1" Grid.Row="0" >
+            <StackPanel Name="informationBoard">
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Column="0" Grid.Row="0" BorderBrush="Gray" BorderThickness="0, 0, 1, 0" >
+            <StackPanel Margin="0, 10, 0, 10">
+                <Button HorizontalAlignment="Center"> Na Poslu </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+</Window>

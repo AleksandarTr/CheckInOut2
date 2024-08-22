@@ -102,8 +102,8 @@ public class DatabaseInterface {
         SqliteCommand stateChecker = connection.CreateCommand();
         stateChecker.CommandText = "Select Count(*) from Logs where employeeID = $id and time < $time and time LIKE $date";
         stateChecker.Parameters.AddWithValue("$id", id);
-        stateChecker.Parameters.AddWithValue("$time", $"{time.Year}.{time.Month}.{time.Day}-{time.Hour}:{time.Minute}");
-        stateChecker.Parameters.AddWithValue("$date", $"{time.Year}.{time.Month}.{time.Day}%");
+        stateChecker.Parameters.AddWithValue("$time", $"{time.Year}.{time.Month:00}.{time.Day:00}-{time.Hour:00}:{time.Minute:00}");
+        stateChecker.Parameters.AddWithValue("$date", $"{time.Year}.{time.Month:00}.{time.Day:00}%");
         SqliteDataReader stateReader = stateChecker.ExecuteReader();
         stateReader.Read();
         bool isLeaving = stateReader.GetInt32(0) % 2 != 0;
@@ -111,7 +111,7 @@ public class DatabaseInterface {
         SqliteCommand logger = connection.CreateCommand();
         logger.CommandText = "Insert into Logs (employeeID, time) Values ($id, $time)";
         logger.Parameters.AddWithValue("$id", id);
-        logger.Parameters.AddWithValue("$time", $"{time.Year}.{time.Month}.{time.Day}-{time.Hour}:{time.Minute}");
+        logger.Parameters.AddWithValue("$time", $"{time.Year}.{time.Month:00}.{time.Day:00}-{time.Hour:00}:{time.Minute:00}");
         logger.ExecuteNonQuery();
 
         if(isLeaving) return $"{name} je napustio posao u {time.Hour}:{time.Minute}.";
@@ -167,6 +167,24 @@ public class DatabaseInterface {
             return false;
         }
         return true;
+    }
+
+    public List<String> getActiveEmployees(DateTime date) {
+        List<String> employees = new List<String>();
+
+        SqliteCommand employeeFetcherCommand = connection.CreateCommand();
+        employeeFetcherCommand.CommandText = @"Select firstName, lastName, Count(*) 
+        from Employees E join Logs L on E.id = L.employeeID 
+        where time LIKE $date 
+        group by firstName, lastName";
+        employeeFetcherCommand.Parameters.AddWithValue("$date", $"{date.Year}.{date.Month:00}.{date.Day:00}%");
+        SqliteDataReader employeeFetcher = employeeFetcherCommand.ExecuteReader();
+        
+        while(employeeFetcher.Read()) 
+            if(employeeFetcher.GetInt32(2) % 2 != 0) 
+                employees.Add(employeeFetcher.GetString(0) + " " + employeeFetcher.GetString(1));
+
+        return employees;
     }
 
     ~DatabaseInterface() {

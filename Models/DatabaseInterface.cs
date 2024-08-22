@@ -118,6 +118,57 @@ public class DatabaseInterface {
         return $"{name} je dosao na posao u {time.Hour}:{time.Minute}.";
     }
 
+    public bool addEmployee(String firstname, String lastname, String chip, ref String error) {
+        if(firstname.Length == 0) {
+            error = "Ime ne može da bude prazno.";
+            return false;
+        }
+        if(lastname.Length == 0) {
+            error = "Prezime ne može da bude prazno.";
+            return false;
+        }
+        if(chip.Length == 0) {
+            error = "Čip ne može da bude prazno.";
+            return false;
+        }
+
+        SqliteCommand employeeInsertCommand = connection.CreateCommand();
+        employeeInsertCommand.CommandText = "Insert into Employees (firstName, lastName, chip) Values ($firstName, $lastName, $chip)";
+        employeeInsertCommand.Parameters.AddWithValue("$firstName", firstname);
+        employeeInsertCommand.Parameters.AddWithValue("$lastName", lastname);
+        employeeInsertCommand.Parameters.AddWithValue("$chip", chip);
+        employeeInsertCommand.ExecuteNonQuery();
+
+        return true;
+    }
+
+    public bool updateEmployee(int id, String firstname, String lastname, String chip, ref String error) {
+        if(firstname.Length == 0) {
+            error = "Ime ne može da bude prazno.";
+            return false;
+        }
+        if(lastname.Length == 0) {
+            error = "Prezime ne može da bude prazno.";
+            return false;
+        }
+        if(chip.Length == 0) {
+            error = "Čip ne može da bude prazno.";
+            return false;
+        }
+
+        SqliteCommand employeeUpdateCommand = connection.CreateCommand();
+        employeeUpdateCommand.CommandText = "Update Employees set firstName = $firstName, lastName = $lastName, chip = $chip where id = $id";
+        employeeUpdateCommand.Parameters.AddWithValue("$firstName", firstname);
+        employeeUpdateCommand.Parameters.AddWithValue("$lastName", lastname);
+        employeeUpdateCommand.Parameters.AddWithValue("$chip", chip);
+        employeeUpdateCommand.Parameters.AddWithValue("$id", id);
+        if(employeeUpdateCommand.ExecuteNonQuery() == 0) {
+            error = "Ne postoji radnik sa datim id-om.";
+            return false;
+        }
+        return true;
+    }
+
     ~DatabaseInterface() {
         connection.Close();
     }

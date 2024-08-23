@@ -18,15 +18,18 @@ public partial class MainWindowViewModel : ObservableObject
         readerInput += handler;
     }
 
-    public bool ShowActiveEmplyees() {
+    public void showActiveEmplyees() {
         ActiveEmployeesWindow activeEmployeesWindow = new ActiveEmployeesWindow(db);
         activeEmployeesWindow.Show();
-        return true;
     }
 
     public MainWindowViewModel() {
         db = new DatabaseInterface("checkIO.db");
         List<String> employees = db.getActiveEmployees(DateTime.Now.AddDays(-1));
+    }
 
+    public void logIn() {
+        LogInWindow logInWindow= new LogInWindow(db);
+        logInWindow.Show();
     }
 }

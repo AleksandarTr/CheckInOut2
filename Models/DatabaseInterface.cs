@@ -1,12 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection.Metadata;
+using Avalonia.Metadata;
+using CheckInOut2.ViewModels;
 using Microsoft.Data.Sqlite;
 
 namespace CheckInOut2.Models;
 
 public class DatabaseInterface {
     private SqliteConnection connection;
+
+    private const string employeesCreate = @"
+        Create Table Employees(
+        id Integer PRIMARY KEY AUTOINCREMENT,
+        firstName Text NOT NULL,
+        lastName Text NOT NULL,
+        chip Text NOT NULL)";
+
+    private const string logsCreate = @"
+        Create Table Logs(
+        id Integer PRIMARY KEY AUTOINCREMENT,
+        employeeID Integer NOT NULL REFERENCES Employees(id),
+        time Text NOT NULL)";
+
+    private const string usersCreate = @"
+        Create Table Users(
+        username Text PRIMARY KEY,
+        password Text NOT NULL,
+        chip Text NOT NULL,
+        permission Integer NOT NULL)";
 
     private void createDatabase() {
         String createConnectionString = new SqliteConnectionStringBuilder(connection.ConnectionString){
@@ -17,29 +40,22 @@ public class DatabaseInterface {
         connection.Open();
 
         SqliteCommand createEmployeesTable = connection.CreateCommand();
-        createEmployeesTable.CommandText = @"
-        Create Table Employees(
-        id Integer PRIMARY KEY AUTOINCREMENT,
-        firstName Text NOT NULL,
-        lastName Text NOT NULL,
-        chip Text NOT NULL)";
+        createEmployeesTable.CommandText = employeesCreate;
         createEmployeesTable.ExecuteNonQuery();
 
         SqliteCommand createLogsTable = connection.CreateCommand();
-        createLogsTable.CommandText = @"
-        Create Table Logs(
-        id Integer PRIMARY KEY AUTOINCREMENT,
-        employeeID Integer NOT NULL REFERENCES Employees(id),
-        time Text NOT NULL)";
+        createLogsTable.CommandText = logsCreate;
         createLogsTable.ExecuteNonQuery();
 
         SqliteCommand createUsersTable = connection.CreateCommand();
-        createUsersTable.CommandText = @"
-        Create Table Users(
-        username Text PRIMARY KEY,
-        password Text NOT NULL,
-        chip Text NOT NULL)";
+        createUsersTable.CommandText = usersCreate;
         createUsersTable.ExecuteNonQuery();
+    }
+
+    private void updateDatabase() {
+        SqliteCommand addPermissionColumn = connection.CreateCommand();
+        addPermissionColumn.CommandText = "Alter table Users add column permission Integer NOT NULL DEFAULT (0)";
+        addPermissionColumn.ExecuteNonQuery();
     }
 
     private bool checkDatabase() {
@@ -57,9 +73,36 @@ public class DatabaseInterface {
             if(requiredTables.ContainsKey(tableName)) requiredTables[tableName] = true;
         }
 
+        bool result = true;
+
         foreach (KeyValuePair<String, bool> requiredTable in requiredTables)
-            if(!requiredTable.Value) return false;
-        return true;
+            if(!requiredTable.Value) {
+                SqliteCommand tableCreationCommand = connection.CreateCommand();
+                switch (requiredTable.Key) {
+                    case "Employees":
+                        tableCreationCommand.CommandText = employeesCreate;
+                        break;
+                    case "Logs":
+                        tableCreationCommand.CommandText = logsCreate;
+                        break;
+                    case "Users":
+                        tableCreationCommand.CommandText = usersCreate;
+                        break;
+                }
+                tableCreationCommand.ExecuteNonQuery();
+                result = false;
+            }
+
+        SqliteCommand checkUserTable = connection.CreateCommand();
+        checkUserTable.CommandText = "Select username, password, chip, permission from Users";
+        try {
+            checkUserTable.ExecuteNonQuery();
+        }
+        catch (SqliteException ex) {
+            updateDatabase();
+        }
+
+        return result;
     }
 
     public DatabaseInterface(String location) {
@@ -75,7 +118,7 @@ public class DatabaseInterface {
         catch (SqliteException ex) {
             if(ex.SqliteErrorCode == 14) { // Unable to open file
                 if(!File.Exists(location)) createDatabase();
-                else ;//TODO: Add database repair
+                else return;//TODO: Add database repair
             }
         }
 
@@ -185,6 +228,21 @@ public class DatabaseInterface {
                 employees.Add(employeeFetcher.GetString(0) + " " + employeeFetcher.GetString(1));
 
         return employees;
+    }
+
+    public int checkCertification(string username, string password, string chip) {
+        SqliteCommand permissionFetcher = connection.CreateCommand();
+        permissionFetcher.CommandText = "Select permission from Users where username = $username and password = $password and chip = $chip";
+        permissionFetcher.Parameters.AddWithValue("$username", username);
+        permissionFetcher.Parameters.AddWithValue("$password", password);
+        permissionFetcher.Parameters.AddWithValue("$chip", chip);
+
+        SqliteDataReader permissionReader = permissionFetcher.ExecuteReader();
+        if(permissionReader.Read()) {
+            if(username == "admin") return LogInWindowViewModel.MAX_PERMISSION;
+            return permissionReader.GetInt32(0);
+        }
+        return 0;
     }
 
     ~DatabaseInterface() {

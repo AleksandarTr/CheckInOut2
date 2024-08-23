@@ -12,7 +12,7 @@ class ActiveEmployeesWindowViewModel : ObservableObject {
     
     public ActiveEmployeesWindowViewModel(DatabaseInterface db, ActiveEmployeesWindow view) {
         this.db = db;
-        this.activeEmployeesWindow = view;
+        activeEmployeesWindow = view;
         List<String> activeEmployees = db.getActiveEmployees(DateTime.Now.AddDays(-1));
         foreach (String employee in activeEmployees) activeEmployeesWindow.addActiveEmployee(employee);
     }

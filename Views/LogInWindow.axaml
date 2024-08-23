@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CheckInOut2.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="CheckInOut2.Views.LogInWindow"
+        x:DataType="vm:LogInWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Logovanje">
+
+    <Border BorderThickness="1 0 1 1" BorderBrush="Gray">
+        <StackPanel>
+            <TextBox Text="{Binding username}" FontSize="20" Watermark="Korisničko ime" Width="300" Margin="10 5 10 5"/>
+            <TextBox Text="{Binding password}" FontSize="20" Watermark="Šifra" PasswordChar="*" Width="300" Margin="10 5 10 5"/>
+            <TextBlock Name="chip" FontSize="20" Text="{Binding chip}" Margin="10 5 10 5"/>
+            <Button FontSize="20" HorizontalAlignment="Center" Content="Ulogujte se" Margin="10 5 10 5" Command="{Binding logIn}"/>
+        </StackPanel>
+    </Border>
+
+</Window>

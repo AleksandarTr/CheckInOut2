@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CheckInOut2.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="CheckInOut2.Views.AdminWindow"
+        x:DataType="vm:AdminWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Admin">
+
+    <StackPanel>
+        <Button Name="addWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj radnika" Margin="10, 5, 10, 5"/>
+        <Button Name="exportActivity" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Eksportuj aktivnosti" Margin="10, 5, 10, 5"/>
+        <Button Name="checkWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Čekiraj radnika" Margin="10, 5, 10, 5"/>
+        <Button Name="editWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Podesi radnika" Margin="10, 5, 10, 5"/>
+        <Button Name="editCheck" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni čekiranje" Margin="10, 5, 10, 5"/>
+        <Button Name="closeProgram" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Zatvori program" Margin="10, 5, 10, 5"/>
+    </StackPanel>
+
+</Window>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -14,6 +15,11 @@ public partial class MainWindow : Window
         if(infoBoard == null) return false;
         infoBoard.Children.Add(new TextBlock{Text = message});
         return true;
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e) {
+        e.Cancel = true;
+        base.OnClosing(e);
     }
 
     public MainWindow()

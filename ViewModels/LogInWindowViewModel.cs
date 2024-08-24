@@ -12,7 +12,7 @@ class LogInWindowViewModel : ObservableObject {
     public string password {get; set;} = "";
     public string chip {get; set;} = "";
 
-    public static int MAX_PERMISSION = 63;
+    public static int MAX_PERMISSION = 255;
 
     private DatabaseInterface db;
     private LogInWindow view;

@@ -11,7 +11,7 @@
 
     <Border BorderBrush="Gray" BorderThickness="2 0 2 2">
         <StackPanel>
-            <Button Name="addWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj radnika" Margin="10, 5, 10, 5"/>
+            <Button Name="addWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj radnika" Margin="10, 5, 10, 5" Command="{Binding addWorker}"/>
             <Button Name="checkWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Čekiraj radnika" Margin="10, 5, 10, 5"/>
             <Button Name="editWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Podesi radnika" Margin="10, 5, 10, 5"/>
             <Button Name="exportActivity" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Eksportuj aktivnosti" Margin="10, 5, 10, 5"/>

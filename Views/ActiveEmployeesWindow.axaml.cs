@@ -7,7 +7,6 @@ using CheckInOut2.ViewModels;
 namespace CheckInOut2.Views;
 
 partial class ActiveEmployeesWindow : Window {
-
     public void addActiveEmployee(string name) {
         TextBlock employeeBlock = new TextBlock() {
             Text = $"{name} je na poslu.",
@@ -17,9 +16,15 @@ partial class ActiveEmployeesWindow : Window {
         activeEmployeesList?.Children.Add(employeeBlock);
     }
 
-    public ActiveEmployeesWindow(DatabaseInterface db) {
+    protected override void OnClosing(WindowClosingEventArgs e) {
+
+        base.OnClosing(e);
+    }
+
+    public ActiveEmployeesWindow(DatabaseInterface db, MainWindowViewModel mainWindowViewModel) {
         AvaloniaXamlLoader.Load(this);
         DataContext = new ActiveEmployeesWindowViewModel(db, this);
         SizeToContent = SizeToContent.WidthAndHeight;
+        Closing += (sender, e) => mainWindowViewModel.showActiveEmplyeesClosed();
     }
 }

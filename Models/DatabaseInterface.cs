@@ -5,6 +5,7 @@ using System.Reflection.Metadata;
 using Avalonia.Metadata;
 using CheckInOut2.ViewModels;
 using Microsoft.Data.Sqlite;
+using MsBox.Avalonia;
 
 namespace CheckInOut2.Models;
 
@@ -245,6 +246,37 @@ public class DatabaseInterface {
         return 0;
     }
 
+    public bool addWorker(string firstName, string lastName, string chip, ref string error) {
+        SqliteCommand checkNameMatchCommand = connection.CreateCommand();
+        checkNameMatchCommand.CommandText = "Select id from Employees where firstName = $firstName and lastName = $lastName";
+        checkNameMatchCommand.Parameters.AddWithValue("firstName", firstName);
+        checkNameMatchCommand.Parameters.AddWithValue("lastName", lastName);
+        if(checkNameMatchCommand.ExecuteReader().Read()) {
+            error = $"Već postoji radnik koji se zove {firstName} {lastName}.";
+            return false;
+        }
+
+        SqliteCommand checkChipCommand = connection.CreateCommand();
+        checkChipCommand.CommandText = "Select firstName, lastName from Employees where chip = $chip";
+        checkChipCommand.Parameters.AddWithValue("chip", chip);
+        SqliteDataReader checkChipReader = checkChipCommand.ExecuteReader();
+        if(checkChipReader.Read()) 
+            MessageBoxManager.GetMessageBoxStandard("Upozorenje", 
+                $"{checkChipReader.GetString(0)} {checkChipReader.GetString(1)} već ima isti broj čipa.", 
+                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Warning).ShowAsync();
+
+        SqliteCommand addCommand = connection.CreateCommand();
+        addCommand.CommandText = "Insert into Employees (firstName, lastName, chip) values ($firstName, $lastName, $chip)";
+        addCommand.Parameters.AddWithValue("firstName", firstName);
+        addCommand.Parameters.AddWithValue("lastName", lastName);
+        addCommand.Parameters.AddWithValue("chip", chip);
+        if(addCommand.ExecuteNonQuery() == 0) {
+            error = "Nije mogao da bude dodat radnik.";
+            return false;
+        }
+        return true;
+    }
+    
     ~DatabaseInterface() {
         connection.Close();
     }

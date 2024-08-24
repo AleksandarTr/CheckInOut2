@@ -13,23 +13,39 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private event ReaderEventHandler? readerInput;
     private DatabaseInterface db;
+    private bool adminPanelOpen = false;
+    private bool showActiveEmplyeesOpen = false;
+    private MainWindow view;
+
+    public void adminPanelClosed() {
+        adminPanelOpen = false;
+    }
+
+    public void showActiveEmplyeesClosed() {
+        showActiveEmplyeesOpen = false;
+    }
 
     public void addReaderEventHandler(ReaderEventHandler handler) {
         readerInput += handler;
     }
 
     public void showActiveEmplyees() {
-        ActiveEmployeesWindow activeEmployeesWindow = new ActiveEmployeesWindow(db);
-        activeEmployeesWindow.Show();
+        if(showActiveEmplyeesOpen) return;
+        ActiveEmployeesWindow activeEmployeesWindow = new ActiveEmployeesWindow(db, this);
+        activeEmployeesWindow.Show(view);
+        showActiveEmplyeesOpen = true;
     }
 
-    public MainWindowViewModel() {
+    public MainWindowViewModel(MainWindow view) {
         db = new DatabaseInterface("checkIO.db");
         List<String> employees = db.getActiveEmployees(DateTime.Now.AddDays(-1));
+        this.view = view;
     }
 
     public void logIn() {
-        LogInWindow logInWindow= new LogInWindow(db);
-        logInWindow.Show();
+        if(adminPanelOpen) return;
+        LogInWindow logInWindow = new LogInWindow(db, view);
+        logInWindow.Show(view);
+        adminPanelOpen = true;
     }
 }

@@ -25,7 +25,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         AvaloniaXamlLoader.Load(this);
-        MainWindowViewModel viewModel = new MainWindowViewModel();
+        MainWindowViewModel viewModel = new MainWindowViewModel(this);
         DataContext = viewModel;
         viewModel.addReaderEventHandler(new ReaderEventHandler(addMessage));
     }

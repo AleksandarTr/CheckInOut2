@@ -277,6 +277,57 @@ public class DatabaseInterface {
         return true;
     }
     
+    public bool editWorker(int id, string firstName, string lastName, string chip, ref string error) {
+        SqliteCommand checkNameMatchCommand = connection.CreateCommand();
+        checkNameMatchCommand.CommandText = "Select id from Employees where firstName = $firstName and lastName = $lastName";
+        checkNameMatchCommand.Parameters.AddWithValue("firstName", firstName);
+        checkNameMatchCommand.Parameters.AddWithValue("lastName", lastName);
+        SqliteDataReader checkNameMatchReader = checkNameMatchCommand.ExecuteReader();
+        if(checkNameMatchReader.Read() && (checkNameMatchReader.GetInt32(0) != id || checkNameMatchReader.Read())) {
+            error = $"Već postoji radnik koji se zove {firstName} {lastName}.";
+            return false;
+        }
+
+        SqliteCommand checkChipCommand = connection.CreateCommand();
+        checkChipCommand.CommandText = "Select id, firstName, lastName from Employees where chip = $chip";
+        checkChipCommand.Parameters.AddWithValue("chip", chip);
+        SqliteDataReader checkChipReader = checkChipCommand.ExecuteReader();
+        if(checkChipReader.Read() && checkChipReader.GetInt32(0) != id) {
+            if(checkChipReader.Read()) MessageBoxManager.GetMessageBoxStandard("Upozorenje", 
+                $"{checkChipReader.GetString(1)} {checkChipReader.GetString(2)} već ima isti broj čipa.", 
+                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Warning).ShowAsync();
+        }
+
+        SqliteCommand workerUpdateCommand = connection.CreateCommand();
+        workerUpdateCommand.CommandText = "Update Employees set firstName = $firstName, lastName = $lastName, chip = $chip where id = $id";
+        workerUpdateCommand.Parameters.AddWithValue("firstName", firstName);
+        workerUpdateCommand.Parameters.AddWithValue("lastName", lastName);
+        workerUpdateCommand.Parameters.AddWithValue("chip", chip);
+        workerUpdateCommand.Parameters.AddWithValue("id", id);
+        if(workerUpdateCommand.ExecuteNonQuery() == 0) {
+            error = $"Nije pronađen radnik s id-om {id}";
+            return false;
+        }
+
+        return true;
+    }
+
+    public List<Worker> getWorkers() {
+        List<Worker> workers = new List<Worker>();
+
+        SqliteCommand workerFetcherCommand = connection.CreateCommand();
+        workerFetcherCommand.CommandText = "Select id, firstName, lastName, chip from Employees";
+        SqliteDataReader workerFetcher = workerFetcherCommand.ExecuteReader();
+        while(workerFetcher.Read()) 
+            workers.Add(new Worker() {
+                id = workerFetcher.GetInt32(0),
+                firstName = workerFetcher.GetString(1),
+                lastName = workerFetcher.GetString(2),
+                chip = workerFetcher.GetString(3)
+            });
+
+        return workers;
+    }    
     ~DatabaseInterface() {
         connection.Close();
     }

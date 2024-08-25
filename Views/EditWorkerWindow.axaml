@@ -3,18 +3,19 @@
         xmlns:vm="using:CheckInOut2.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        x:Class="CheckInOut2.Views.AddWorkerWindow"
-        x:DataType="vm:AddWorkerWindowViewModel"
+        x:Class="CheckInOut2.Views.EditWorkerWindow"
+        x:DataType="vm:EditWorkerWindowViewModel"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Dodavanje radnika">
+        Title="Uređivanje podataka o radniku">
         
     <Border BorderThickness="1 0 1 1" BorderBrush="Gray">
         <StackPanel>
-            <TextBox Text="{Binding firstName}" Watermark="Ime" FontSize="20" Width="300" Margin="10 5 10 5"/>
+            <ListBox SelectedIndex="{Binding worker}" ItemsSource="{Binding names}" Name="workerList" FontSize="20" Width="300" Margin="10 5 10 5"/>
+            <TextBox Text="{Binding firstName, Mode=TwoWay}" Watermark="Ime" FontSize="20" Width="300" Margin="10 5 10 5"/>
             <TextBox Text="{Binding lastName}" Watermark="Prezime" FontSize="20" Width="300" Margin="10 5 10 5"/>
             <TextBlock Text="{Binding chip}" FontSize="20" Width="300" Margin="10 5 10 5"/>
-            <Button Content="Dodaj" HorizontalAlignment="Center" FontSize="20" Margin="10 5 10 5" Command="{Binding addWorker}"/>
+            <Button Content="Sačuvaj" HorizontalAlignment="Center" FontSize="20" Margin="10 5 10 5" Command="{Binding saveWorker}"/>
         </StackPanel>
     </Border>
 </Window>

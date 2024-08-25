@@ -13,7 +13,7 @@
         <StackPanel>
             <Button Name="addWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj radnika" Margin="10, 5, 10, 5" Command="{Binding addWorker}"/>
             <Button Name="checkWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Čekiraj radnika" Margin="10, 5, 10, 5"/>
-            <Button Name="editWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Podesi radnika" Margin="10, 5, 10, 5"/>
+            <Button Name="editWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Podesi radnika" Margin="10, 5, 10, 5" Command="{Binding editWorker}"/>
             <Button Name="exportActivity" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Eksportuj aktivnosti" Margin="10, 5, 10, 5"/>
             <Button Name="editCheck" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni čekiranje" Margin="10, 5, 10, 5"/>
             <Button Name="addUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj korisnika" Margin="10, 5, 10, 5"/>

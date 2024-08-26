@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection.Metadata;
-using Avalonia.Metadata;
 using CheckInOut2.ViewModels;
 using Microsoft.Data.Sqlite;
 using MsBox.Avalonia;

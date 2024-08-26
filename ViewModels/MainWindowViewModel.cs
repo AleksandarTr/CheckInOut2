@@ -31,9 +31,8 @@ public partial class MainWindowViewModel : ObservableObject
 
     public void showActiveEmplyees() {
         if(showActiveEmplyeesOpen) return;
-        ActiveEmployeesWindow activeEmployeesWindow = new ActiveEmployeesWindow(db, this);
-        activeEmployeesWindow.Show(view);
-        showActiveEmplyeesOpen = true;
+        showActiveEmplyeesOpen = true;  
+        new ActiveEmployeesWindow(db, view);
     }
 
     public MainWindowViewModel(MainWindow view) {

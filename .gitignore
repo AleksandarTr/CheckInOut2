@@ -255,3 +255,6 @@ paket-files/
 # Visual Studio Code
 .vscode/
 .DS_Store
+
+./checkIO.db
+./CheckInOut2.generated.sln

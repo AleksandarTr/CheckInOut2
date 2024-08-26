@@ -25,6 +25,11 @@ class AdminWindowViewModel : ObservableObject {
         editWorkerWindow.Show(view);
     }
 
+    public void checkWorker() {
+        WorkerCheckWindow workerCheckWindow = new WorkerCheckWindow(db);
+        workerCheckWindow.Show(view);
+    }
+
     public AdminWindowViewModel(AdminWindow view, DatabaseInterface db) {
         this.view = view;
         this.db = db;

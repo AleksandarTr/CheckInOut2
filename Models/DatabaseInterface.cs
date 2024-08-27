@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using CheckInOut2.ViewModels;
 using Microsoft.Data.Sqlite;
@@ -144,8 +145,8 @@ public class DatabaseInterface {
         SqliteCommand stateChecker = connection.CreateCommand();
         stateChecker.CommandText = "Select Count(*) from Logs where employeeID = $id and time < $time and time LIKE $date";
         stateChecker.Parameters.AddWithValue("$id", id);
-        stateChecker.Parameters.AddWithValue("$time", $"{time.Year}.{time.Month:00}.{time.Day:00}-{time.Hour:00}:{time.Minute:00}");
-        stateChecker.Parameters.AddWithValue("$date", $"{time.Year}.{time.Month:00}.{time.Day:00}%");
+        stateChecker.Parameters.AddWithValue("$time", time.ToString("yyyy.MM.dd-HH:mm"));
+        stateChecker.Parameters.AddWithValue("$date", time.ToString("yyyy.MM.dd") + "%");
         SqliteDataReader stateReader = stateChecker.ExecuteReader();
         stateReader.Read();
         bool isLeaving = stateReader.GetInt32(0) % 2 != 0;
@@ -153,7 +154,7 @@ public class DatabaseInterface {
         SqliteCommand logger = connection.CreateCommand();
         logger.CommandText = "Insert into Logs (employeeID, time) Values ($id, $time)";
         logger.Parameters.AddWithValue("$id", id);
-        logger.Parameters.AddWithValue("$time", $"{time.Year}.{time.Month:00}.{time.Day:00}-{time.Hour:00}:{time.Minute:00}");
+        logger.Parameters.AddWithValue("$time", time.ToString("yyyy.MM.dd-HH:mm"));
         logger.ExecuteNonQuery();
 
         if(isLeaving) return $"{name} je napustio posao u {time.Hour}:{time.Minute}.";
@@ -219,7 +220,7 @@ public class DatabaseInterface {
         from Employees E join Logs L on E.id = L.employeeID 
         where time LIKE $date 
         group by firstName, lastName";
-        employeeFetcherCommand.Parameters.AddWithValue("$date", $"{date.Year}.{date.Month:00}.{date.Day:00}%");
+        employeeFetcherCommand.Parameters.AddWithValue("$date", date.ToString("yyyy.MM.dd") + "%");
         SqliteDataReader employeeFetcher = employeeFetcherCommand.ExecuteReader();
         
         while(employeeFetcher.Read()) 
@@ -326,6 +327,48 @@ public class DatabaseInterface {
 
         return workers;
     }    
+    
+    public List<Check> getChecks(DateTime date) {
+        List<Check> checks = new List<Check>();
+        SqliteCommand checkFetcherCommand = connection.CreateCommand();
+        checkFetcherCommand.CommandText = @"Select C.id, time, E.id, firstName, lastName, chip
+        from Logs C join Employees E on C.employeeID = E.id
+        where time LIKE $date";
+        checkFetcherCommand.Parameters.AddWithValue("date", date.ToString("yyyy.MM.dd") + "%");
+        SqliteDataReader checkFetcher = checkFetcherCommand.ExecuteReader();
+
+        while(checkFetcher.Read()) {
+            checks.Add(new Check() {
+                id = checkFetcher.GetInt32(0),
+                time = DateTime.ParseExact(checkFetcher.GetString(1), "yyyy.MM.dd-HH:mm", CultureInfo.InvariantCulture),
+                worker = new Worker() {
+                    id = checkFetcher.GetInt32(2),
+                    firstName = checkFetcher.GetString(3),
+                    lastName = checkFetcher.GetString(4),
+                    chip = checkFetcher.GetString(5)
+                }
+            });
+        }
+        return checks;
+    }
+
+    public bool editCheck(int id, DateTime time) {
+        SqliteCommand checkEditorCommand = connection.CreateCommand();
+        checkEditorCommand.CommandText = "Update Logs set time = $time where id = $id";
+        checkEditorCommand.Parameters.AddWithValue("time", time.ToString("yyyy.MM.dd-HH:mm"));
+        checkEditorCommand.Parameters.AddWithValue("id", id);
+        if(checkEditorCommand.ExecuteNonQuery() == 0) return false;
+        return true;
+    }
+
+    public bool deleteCheck(int id) {
+        SqliteCommand checkDeleteCommand = connection.CreateCommand();
+        checkDeleteCommand.CommandText = "Delete from Logs where id = $id";
+        checkDeleteCommand.Parameters.AddWithValue("id", id);
+        if(checkDeleteCommand.ExecuteNonQuery() == 0) return false;
+        return true;
+    }
+
     ~DatabaseInterface() {
         connection.Close();
     }

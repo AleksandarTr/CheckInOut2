@@ -256,5 +256,5 @@ paket-files/
 .vscode/
 .DS_Store
 
-./checkIO.db
-./CheckInOut2.generated.sln
+checkIO.db
+CheckInOut2.generated.sln

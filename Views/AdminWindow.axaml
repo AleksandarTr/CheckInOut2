@@ -17,7 +17,7 @@
             <Button Name="exportActivity" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izvezi aktivnosti" Margin="10, 5, 10, 5" Command="{Binding export}"/>
             <Button Name="editCheck" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni čekiranje" Margin="10, 5, 10, 5" Command="{Binding editCheck}"/>
             <Button Name="addUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj korisnika" Margin="10, 5, 10, 5" Command="{Binding addUser}"/>
-            <Button Name="editUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni korisnika" Margin="10, 5, 10, 5"/>
+            <Button Name="editUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni korisnika" Margin="10, 5, 10, 5" Command="{Binding editUser}"/>
             <Button Name="closeProgram" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Zatvori program" Margin="10, 5, 10, 5" Command="{Binding closeApp}"/>
         </StackPanel>
     </Border>

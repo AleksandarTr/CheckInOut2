@@ -50,6 +50,12 @@ public class DatabaseInterface {
         SqliteCommand createUsersTable = connection.CreateCommand();
         createUsersTable.CommandText = usersCreate;
         createUsersTable.ExecuteNonQuery();
+
+        SqliteCommand addAdmin = connection.CreateCommand();
+        string defaultPassword = LogInWindowViewModel.ComputeSha256Hash("password");
+        addAdmin.CommandText = "Insert into Users values ('admin', $password, '', 0)";
+        addAdmin.Parameters.AddWithValue("password", defaultPassword);
+        addAdmin.ExecuteNonQuery();
     }
 
     private void updateDatabase() {
@@ -342,6 +348,46 @@ public class DatabaseInterface {
         userAddCommand.Parameters.AddWithValue("permission", permission);
         if(userAddCommand.ExecuteNonQuery() == 0) {
             error = "Nije mogao da bude dodat korisnik.";
+            return false;
+        }
+        return true;
+    }
+
+    public List<User> getUsers() {
+        List<User> users = new List<User>();
+        SqliteCommand userFetcherCommand = connection.CreateCommand();
+        userFetcherCommand.CommandText = "Select username, chip, permission from Users";
+        SqliteDataReader userFetcher = userFetcherCommand.ExecuteReader();
+
+        while(userFetcher.Read()) {
+            users.Add(new User() {
+                username = userFetcher.GetString(0),
+                chip = userFetcher.GetString(1),
+                permission = userFetcher.GetInt32(2)
+            });
+        }
+        return users;
+    }
+
+    public bool editUser(string oldUsername, string username, string password, string chip, int permission, ref string error) {
+        SqliteCommand usernameCheckCommand = connection.CreateCommand();
+        usernameCheckCommand.CommandText = "Select username from Users where username = $username";
+        usernameCheckCommand.Parameters.AddWithValue("username", username);
+        if(oldUsername != username && usernameCheckCommand.ExecuteReader().Read()) {
+            error = "Već postoji korisnik sa istim korisničkim imenom.";
+            return false;
+        }
+
+        SqliteCommand userEditCommand = connection.CreateCommand();
+        userEditCommand.CommandText = "Update Users set username = $username, password = $password, chip = $chip, permission = $permission where username = $oldUsername";
+        userEditCommand.Parameters.AddWithValue("username", username);
+        userEditCommand.Parameters.AddWithValue("password", password);
+        userEditCommand.Parameters.AddWithValue("chip", chip);
+        userEditCommand.Parameters.AddWithValue("permission", permission);
+        userEditCommand.Parameters.AddWithValue("oldUsername", oldUsername);
+
+        if(userEditCommand.ExecuteNonQuery() == 0) {
+            error = "Nije mogao da bude promenjen korisnik.";
             return false;
         }
         return true;

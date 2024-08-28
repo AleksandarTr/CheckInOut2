@@ -45,6 +45,11 @@ class AdminWindowViewModel : ObservableObject {
         addUserWindow.Show(view);
     }
 
+    public void editUser() {
+        EditUserWindow editUserWindow = new EditUserWindow(db);
+        editUserWindow.Show(view);
+    }
+
     public AdminWindowViewModel(AdminWindow view, DatabaseInterface db) {
         this.view = view;
         this.db = db;

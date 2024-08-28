@@ -160,58 +160,7 @@ public class DatabaseInterface {
         if(isLeaving) return $"{name} je napustio posao u {time.Hour}:{time.Minute}.";
         return $"{name} je dosao na posao u {time.Hour}:{time.Minute}.";
     }
-
-    public bool addEmployee(String firstname, String lastname, String chip, ref String error) {
-        if(firstname.Length == 0) {
-            error = "Ime ne može da bude prazno.";
-            return false;
-        }
-        if(lastname.Length == 0) {
-            error = "Prezime ne može da bude prazno.";
-            return false;
-        }
-        if(chip.Length == 0) {
-            error = "Čip ne može da bude prazno.";
-            return false;
-        }
-
-        SqliteCommand employeeInsertCommand = connection.CreateCommand();
-        employeeInsertCommand.CommandText = "Insert into Employees (firstName, lastName, chip) Values ($firstName, $lastName, $chip)";
-        employeeInsertCommand.Parameters.AddWithValue("$firstName", firstname);
-        employeeInsertCommand.Parameters.AddWithValue("$lastName", lastname);
-        employeeInsertCommand.Parameters.AddWithValue("$chip", chip);
-        employeeInsertCommand.ExecuteNonQuery();
-
-        return true;
-    }
-
-    public bool updateEmployee(int id, String firstname, String lastname, String chip, ref String error) {
-        if(firstname.Length == 0) {
-            error = "Ime ne može da bude prazno.";
-            return false;
-        }
-        if(lastname.Length == 0) {
-            error = "Prezime ne može da bude prazno.";
-            return false;
-        }
-        if(chip.Length == 0) {
-            error = "Čip ne može da bude prazno.";
-            return false;
-        }
-
-        SqliteCommand employeeUpdateCommand = connection.CreateCommand();
-        employeeUpdateCommand.CommandText = "Update Employees set firstName = $firstName, lastName = $lastName, chip = $chip where id = $id";
-        employeeUpdateCommand.Parameters.AddWithValue("$firstName", firstname);
-        employeeUpdateCommand.Parameters.AddWithValue("$lastName", lastname);
-        employeeUpdateCommand.Parameters.AddWithValue("$chip", chip);
-        employeeUpdateCommand.Parameters.AddWithValue("$id", id);
-        if(employeeUpdateCommand.ExecuteNonQuery() == 0) {
-            error = "Ne postoji radnik sa datim id-om.";
-            return false;
-        }
-        return true;
-    }
-
+    
     public List<String> getActiveEmployees(DateTime date) {
         List<String> employees = new List<String>();
 
@@ -373,6 +322,28 @@ public class DatabaseInterface {
         checkDeleteCommand.CommandText = "Delete from Logs where id = $id";
         checkDeleteCommand.Parameters.AddWithValue("id", id);
         if(checkDeleteCommand.ExecuteNonQuery() == 0) return false;
+        return true;
+    }
+
+    public bool addUser(string username, string password, string chip, int permission, ref string error) {
+        SqliteCommand checkUsernameCommand = connection.CreateCommand();
+        checkUsernameCommand.CommandText = "Select username from Users where username = $username";
+        checkUsernameCommand.Parameters.AddWithValue("username", username);
+        if(checkUsernameCommand.ExecuteReader().Read()) {
+            error = "Već postoji korisnik sa datim korisničkim imenom.";
+            return false;
+        }
+
+        SqliteCommand userAddCommand = connection.CreateCommand();
+        userAddCommand.CommandText = "Insert into Users values ($username, $password, $chip, $permission)";
+        userAddCommand.Parameters.AddWithValue("username", username);
+        userAddCommand.Parameters.AddWithValue("password", password);
+        userAddCommand.Parameters.AddWithValue("chip", chip);
+        userAddCommand.Parameters.AddWithValue("permission", permission);
+        if(userAddCommand.ExecuteNonQuery() == 0) {
+            error = "Nije mogao da bude dodat korisnik.";
+            return false;
+        }
         return true;
     }
 

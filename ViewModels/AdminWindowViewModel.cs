@@ -35,6 +35,11 @@ class AdminWindowViewModel : ObservableObject {
         editCheckWindow.Show(view);
     }
 
+    public void export() {
+        ExportWindow exportWorkerWindow = new ExportWindow(db);
+        exportWorkerWindow.Show(view);
+    }
+
     public AdminWindowViewModel(AdminWindow view, DatabaseInterface db) {
         this.view = view;
         this.db = db;

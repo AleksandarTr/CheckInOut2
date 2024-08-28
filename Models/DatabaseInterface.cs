@@ -328,13 +328,20 @@ public class DatabaseInterface {
         return workers;
     }    
     
-    public List<Check> getChecks(DateTime date) {
+    public List<Check> getChecks(DateTime date, ExportPeriod period = ExportPeriod.Day) {
         List<Check> checks = new List<Check>();
         SqliteCommand checkFetcherCommand = connection.CreateCommand();
         checkFetcherCommand.CommandText = @"Select C.id, time, E.id, firstName, lastName, chip
         from Logs C join Employees E on C.employeeID = E.id
-        where time LIKE $date";
-        checkFetcherCommand.Parameters.AddWithValue("date", date.ToString("yyyy.MM.dd") + "%");
+        where time LIKE $date
+        order by time ASC";
+        _ = period switch
+        {
+            ExportPeriod.Year => checkFetcherCommand.Parameters.AddWithValue("date", date.ToString("yyyy") + "%"),
+            ExportPeriod.Month => checkFetcherCommand.Parameters.AddWithValue("date", date.ToString("yyyy.MM") + "%"),
+            ExportPeriod.Day => checkFetcherCommand.Parameters.AddWithValue("date", date.ToString("yyyy.MM.dd") + "%"),
+            _ => throw new ArgumentException("Invalid export period provided")
+        };
         SqliteDataReader checkFetcher = checkFetcherCommand.ExecuteReader();
 
         while(checkFetcher.Read()) {

@@ -5,7 +5,7 @@ namespace CheckInOut2.Models;
 public delegate void ChipReaderEventHandler(string chip);
 
 public static class ChipReader {
-    private static event ChipReaderEventHandler chipReaderEvent;
+    private static event ChipReaderEventHandler? chipReaderEvent;
     private static Window? activeWindow = null;
 
     public static void addChipReaderEventHandler(ChipReaderEventHandler chipReaderEventHandler) {
@@ -25,6 +25,6 @@ public static class ChipReader {
     }
 
     public static void readChip(string chip) {
-        chipReaderEvent.Invoke(chip);
+        chipReaderEvent?.Invoke(chip);
     }
 }

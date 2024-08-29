@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.ComponentModel;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using CheckInOut2.ViewModels;
@@ -10,7 +7,8 @@ namespace CheckInOut2.Views;
 
 public partial class MainWindow : Window
 {
-    static public MainWindow instance;
+    static private MainWindow? _instance;
+    static public MainWindow instance { get {return _instance!;} }
 
     public bool addMessage(String message) {
         StackPanel? infoBoard = this.FindControl<StackPanel>("informationBoard");
@@ -29,6 +27,6 @@ public partial class MainWindow : Window
         AvaloniaXamlLoader.Load(this);
         MainWindowViewModel viewModel = new MainWindowViewModel();
         DataContext = viewModel;
-        instance = this;
+        _instance = this;
     }
 }

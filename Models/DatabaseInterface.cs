@@ -69,10 +69,12 @@ public class DatabaseInterface {
         checkerCommand.CommandText = "SELECT name from sqlite_master";
         SqliteDataReader checker = checkerCommand.ExecuteReader();
 
-        Dictionary<String, bool> requiredTables = new Dictionary<String, bool>(StringComparer.InvariantCultureIgnoreCase);
-        requiredTables.Add("Employees", false);
-        requiredTables.Add("Logs", false);
-        requiredTables.Add("Users", false);
+        Dictionary<String, bool> requiredTables = new Dictionary<String, bool>(StringComparer.InvariantCultureIgnoreCase)
+        {
+            { "Employees", false },
+            { "Logs", false },
+            { "Users", false }
+        };
 
         while (checker.Read()) {
             String tableName = checker.GetString(0);
@@ -104,7 +106,8 @@ public class DatabaseInterface {
         try {
             checkUserTable.ExecuteNonQuery();
         }
-        catch (SqliteException ex) {
+        catch (SqliteException)
+        {
             updateDatabase();
         }
 

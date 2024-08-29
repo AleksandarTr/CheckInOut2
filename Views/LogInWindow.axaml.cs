@@ -20,7 +20,7 @@ partial class LogInWindow : Window {
         ChipReader.addChipReaderEventHandler(onChipRead);
         ChipReader.focusWindow(this);
         Closing += (sender, e) => {
-            (MainWindow.instance.DataContext as MainWindowViewModel).adminPanelClosed();
+            if(!e.IsProgrammatic) (MainWindow.instance.DataContext as MainWindowViewModel)!.adminPanelClosed();
             ChipReader.removeChipReaderEventHandler(onChipRead);
             ChipReader.focusWindow(MainWindow.instance);
         };

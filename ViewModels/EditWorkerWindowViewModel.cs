@@ -14,7 +14,7 @@ using MsBox.Avalonia;
 namespace CheckInOut2.ViewModels;
 
 class EditWorkerWindowViewModel : INotifyPropertyChanged {
-    private string _firstName;
+    private string _firstName = "";
 
     public string firstName
     {
@@ -28,7 +28,7 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
             }
         }
     }
-    private string _lastName;
+    private string _lastName = "";
     public string lastName {
         get => _lastName;
         set
@@ -40,7 +40,7 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
             }
         }
     }
-    private string _chip;
+    private string _chip = "";
     public string chip {
         get => _chip;
         set
@@ -58,7 +58,7 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
         private set { _names = value; }
      }
 
-    private int _worker = 0;
+    private int _worker = -1;
     public int worker {get {return _worker;}
      set {
         _worker = value;
@@ -67,9 +67,9 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
     private DatabaseInterface db;
     private List<Worker> workers;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
@@ -101,7 +101,7 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
 
     public EditWorkerWindowViewModel(DatabaseInterface db) {
         this.db = db;
-        names = new ObservableCollection<string>();
+        _names = new ObservableCollection<string>();
         workers = db.getWorkers();
         workers.ForEach(worker => names.Add(worker.firstName + " " + worker.lastName));
     }

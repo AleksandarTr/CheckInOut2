@@ -73,7 +73,7 @@ class EditCheckWindowViewModel : INotifyPropertyChanged {
     }
 
     private DatabaseInterface db;
-    private List<Check> checkInfo;
+    private List<Check> checkInfo = new List<Check>();
 
     private void onDateChanged() {
         checks.Clear();
@@ -137,16 +137,16 @@ class EditCheckWindowViewModel : INotifyPropertyChanged {
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     public EditCheckWindowViewModel(DatabaseInterface db, EditCheckWindow view) {
         this.db = db;
-        checks = new ObservableCollection<string>();
+        _checks = new ObservableCollection<string>();
         onDateChanged();
     }
 }

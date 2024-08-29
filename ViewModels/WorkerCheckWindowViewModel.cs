@@ -20,7 +20,7 @@ class WorkerCheckWindowViewModel
         private set { _names = value; }
      }
 
-    public int worker {get; set; } = 0;
+    public int worker {get; set; } = -1;
 
     private DatabaseInterface db;
     private List<Worker> workers;

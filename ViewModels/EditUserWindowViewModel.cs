@@ -93,11 +93,11 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
         }
     }
     private DatabaseInterface db;
-    private List<User> userList;
+    private List<User> userList = new List<User>();
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
@@ -145,7 +145,7 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
     
     public EditUserWindowViewModel(DatabaseInterface db){
         this.db = db;
-        users = new ObservableCollection<string>();
+        _users = new ObservableCollection<string>();
         userList = db.getUsers();
         userList.ForEach(user => users.Add(user.username));
     }

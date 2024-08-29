@@ -29,7 +29,6 @@ class ExportWindowViewModel {
 
         DateTime date = DateTime.MinValue;
         List<Check> unmatched = new List<Check>();
-        bool first = true;
         log.WriteLine("Ime i prezime,Dolazak,Odlazak,Datum");
 
         foreach (Check check in checks) {
@@ -37,7 +36,6 @@ class ExportWindowViewModel {
                 foreach (Check unmatchedCheck in unmatched) 
                     log.WriteLine($"{unmatchedCheck.worker.firstName} {unmatchedCheck.worker.lastName},{unmatchedCheck.time:HH:mm},,{unmatchedCheck.time:dd.MM.yyyy}");
                 date = check.time;
-                first = false;
                 unmatched.Clear();
             }
             

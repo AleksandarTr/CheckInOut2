@@ -11,7 +11,7 @@ class AdminWindowViewModel : ObservableObject {
     private DatabaseInterface db;
 
     public void closeApp() {
-        IClassicDesktopStyleApplicationLifetime desktop = Application.Current.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+        IClassicDesktopStyleApplicationLifetime desktop = (Application.Current!.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!;
         desktop?.Shutdown();
     }
 

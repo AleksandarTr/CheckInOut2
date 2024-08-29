@@ -5,8 +5,8 @@ using MsBox.Avalonia;
 namespace CheckInOut2.ViewModels;
 
 class AddWorkerWindowViewModel {
-    public string firstName {get;set;}
-    public string lastName {get;set;}
+    public string firstName {get;set;} = "";
+    public string lastName {get;set;} = "";
     public string chip {get;set;} = "Čip: ";
 
     private DatabaseInterface db;

@@ -7,12 +7,22 @@ using CheckInOut2.ViewModels;
 namespace CheckInOut2.Views;
 
 partial class LogInWindow : Window {
-    public LogInWindow(DatabaseInterface db, MainWindow mainWindow) {
+    private void onChipRead(string chip) {
+        if(!ChipReader.isFocused(this)) return;
+        TextBlock? chipBlock = this.FindControl<TextBlock>("chip");
+        chipBlock!.Text = $"Čip: {chip}";
+    }
+
+    public LogInWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
-        DataContext= new LogInWindowViewModel(db, this, mainWindow);
-        SizeToContent = SizeToContent.WidthAndHeight;
-        TextBlock chip = this.FindControl<TextBlock>("chip");
-        chip.Text = "Čip:  ";
-        Closing += (sender, e) => (mainWindow.DataContext as MainWindowViewModel).adminPanelClosed();
+        DataContext= new LogInWindowViewModel(db, this);
+
+        ChipReader.addChipReaderEventHandler(onChipRead);
+        ChipReader.focusWindow(this);
+        Closing += (sender, e) => {
+            (MainWindow.instance.DataContext as MainWindowViewModel).adminPanelClosed();
+            ChipReader.removeChipReaderEventHandler(onChipRead);
+            ChipReader.focusWindow(MainWindow.instance);
+        };
     }
 }

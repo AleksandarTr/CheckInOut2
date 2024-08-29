@@ -6,7 +6,9 @@
         x:Class="CheckInOut2.Views.ActiveEmployeesWindow"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Radnici na poslu">
+        Title="Radnici na poslu"
+        SizeToContent="WidthAndHeight"
+        CanResize="False">
         
     <StackPanel Name="ActiveEmployeesList"/>
 </Window>

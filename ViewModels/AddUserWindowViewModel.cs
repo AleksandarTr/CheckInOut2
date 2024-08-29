@@ -1,9 +1,10 @@
 using CheckInOut2.Models;
+using CheckInOut2.Views;
 using MsBox.Avalonia;
 
 namespace CheckInOut2.ViewModels;
 
-class AddUserWindowViewModel {
+class AddUserWindowViewModel{
     public string username { get; set; } = "";
     public string password { get; set; } = "";
     public string chip { get; set; } = "Čip: ";

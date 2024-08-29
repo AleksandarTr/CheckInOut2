@@ -1,23 +1,23 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using CheckInOut2.Models;
 using CheckInOut2.Views;
-using CommunityToolkit.Mvvm.ComponentModel;
 using MsBox.Avalonia;
 
 namespace CheckInOut2.ViewModels;
 
-class LogInWindowViewModel : ObservableObject {
+class LogInWindowViewModel {
     public string username {get; set;} = "";
     public string password {get; set;} = "";
-    public string chip {get; set;} = "";
+    public string chip {get; set;} = "Čip: ";
 
     public static int MAX_PERMISSION = 255;
 
     private DatabaseInterface db;
     private LogInWindow view;
-    private MainWindow mainWindow;
 
     public static string ComputeSha256Hash(string rawData)
         {
@@ -34,17 +34,15 @@ class LogInWindowViewModel : ObservableObject {
             }
         }
 
-    public LogInWindowViewModel(DatabaseInterface db, LogInWindow view, MainWindow mainWindow) {
+    public LogInWindowViewModel(DatabaseInterface db, LogInWindow view) {
         this.db = db;
         this.view = view;
-        this.mainWindow = mainWindow;
     }
 
     public void logIn() {
         string[] chipParts = chip.Split(' ');
-        string user = this.username;
-        string password = this.password;
         int permission = db.checkCertification(username, ComputeSha256Hash(password), chipParts.Length > 1 ? chipParts[1] : "");
+
         if(permission == 0) {
             MessageBoxManager.GetMessageBoxStandard("Neuspešna prijava", 
                 "Ne postoji korisnik sa datom kombinacijom šifre i korisničkog imena.", 
@@ -52,8 +50,8 @@ class LogInWindowViewModel : ObservableObject {
             return;
         }
 
-        AdminWindow adminWindow = new AdminWindow(permission, mainWindow, db);
-        adminWindow.Show(mainWindow);
+        AdminWindow adminWindow = new AdminWindow(permission, db);
+        adminWindow.Show(MainWindow.instance);
         view.Close();  
     }
 }

@@ -7,7 +7,9 @@
         x:Class="CheckInOut2.Views.AdminWindow"
         x:DataType="vm:AdminWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Admin">
+        Title="Admin"
+        SizeToContent="WidthAndHeight"
+        CanResize="False">
 
     <Border BorderBrush="Gray" BorderThickness="2 0 2 2">
         <StackPanel>

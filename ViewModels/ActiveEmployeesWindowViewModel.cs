@@ -11,7 +11,7 @@ class ActiveEmployeesWindowViewModel : ObservableObject {
     private DatabaseInterface db;
     private ActiveEmployeesWindow activeEmployeesWindow;
     
-    public ActiveEmployeesWindowViewModel(DatabaseInterface db, ActiveEmployeesWindow view, MainWindow mainWindow) {
+    public ActiveEmployeesWindowViewModel(DatabaseInterface db, ActiveEmployeesWindow view) {
         this.db = db;
         activeEmployeesWindow = view;
         List<String> activeEmployees = db.getActiveEmployees(DateTime.Now);
@@ -22,7 +22,7 @@ class ActiveEmployeesWindowViewModel : ObservableObject {
         }
         else {
             foreach (String employee in activeEmployees) activeEmployeesWindow.addActiveEmployee(employee);
-            activeEmployeesWindow.Show(mainWindow);
+            activeEmployeesWindow.Show(MainWindow.instance);
         }
     }
 }

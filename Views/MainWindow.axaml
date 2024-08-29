@@ -18,6 +18,7 @@
     <Grid ColumnDefinitions="100, *" RowDefinitions="*">
         <ScrollViewer Grid.Column="1" Grid.Row="0" >
             <StackPanel Name="informationBoard">
+                <Button Content="read" Command="{Binding readChip}"/>
             </StackPanel>
         </ScrollViewer>
 

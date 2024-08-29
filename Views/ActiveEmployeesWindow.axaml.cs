@@ -21,10 +21,9 @@ partial class ActiveEmployeesWindow : Window {
         base.OnClosing(e);
     }
 
-    public ActiveEmployeesWindow(DatabaseInterface db, MainWindow mainWindow) {
+    public ActiveEmployeesWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
-        Closing += (sender, e) => (mainWindow.DataContext as MainWindowViewModel).showActiveEmplyeesClosed();
-        DataContext = new ActiveEmployeesWindowViewModel(db, this, mainWindow);
-        SizeToContent = SizeToContent.WidthAndHeight;
+        Closing += (sender, e) => (MainWindow.instance.DataContext as MainWindowViewModel).showActiveEmplyeesClosed();
+        DataContext = new ActiveEmployeesWindowViewModel(db, this);
     }
 }

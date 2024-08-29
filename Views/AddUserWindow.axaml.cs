@@ -6,9 +6,21 @@ using CheckInOut2.ViewModels;
 namespace CheckInOut2.Views;
 
 partial class AddUserWindow : Window {
+    private void onChipRead(string chip) {
+        if(!ChipReader.isFocused(this)) return;
+        TextBlock? chipBlock = this.FindControl<TextBlock>("chip");
+        chipBlock!.Text = $"Čip: {chip}";
+    }
+
     public AddUserWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
         DataContext = new AddUserWindowViewModel(db);
-        SizeToContent = SizeToContent.WidthAndHeight;
+
+        ChipReader.addChipReaderEventHandler(onChipRead);
+        ChipReader.focusWindow(this);
+        Closing += (o, sender) => {
+            ChipReader.removeChipReaderEventHandler(onChipRead);
+            ChipReader.focusWindow(MainWindow.instance);
+        };
     }
 }

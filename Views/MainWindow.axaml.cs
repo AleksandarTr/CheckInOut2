@@ -10,6 +10,8 @@ namespace CheckInOut2.Views;
 
 public partial class MainWindow : Window
 {
+    static public MainWindow instance;
+
     public bool addMessage(String message) {
         StackPanel? infoBoard = this.FindControl<StackPanel>("informationBoard");
         if(infoBoard == null) return false;
@@ -25,8 +27,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         AvaloniaXamlLoader.Load(this);
-        MainWindowViewModel viewModel = new MainWindowViewModel(this);
+        MainWindowViewModel viewModel = new MainWindowViewModel();
         DataContext = viewModel;
-        viewModel.addReaderEventHandler(new ReaderEventHandler(addMessage));
+        instance = this;
     }
 }

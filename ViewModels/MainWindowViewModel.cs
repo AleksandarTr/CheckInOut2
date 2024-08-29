@@ -11,11 +11,9 @@ public delegate bool ReaderEventHandler(String message);
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    private event ReaderEventHandler? readerInput;
     private DatabaseInterface db;
     private bool adminPanelOpen = false;
     private bool showActiveEmplyeesOpen = false;
-    private MainWindow view;
 
     public void adminPanelClosed() {
         adminPanelOpen = false;
@@ -25,26 +23,32 @@ public partial class MainWindowViewModel : ObservableObject
         showActiveEmplyeesOpen = false;
     }
 
-    public void addReaderEventHandler(ReaderEventHandler handler) {
-        readerInput += handler;
-    }
-
     public void showActiveEmplyees() {
         if(showActiveEmplyeesOpen) return;
         showActiveEmplyeesOpen = true;  
-        new ActiveEmployeesWindow(db, view);
+        new ActiveEmployeesWindow(db);
     }
 
-    public MainWindowViewModel(MainWindow view) {
+    private void onChipRead(string chip) {
+        if(!ChipReader.isFocused(MainWindow.instance)) return;
+        MainWindow.instance.addMessage(db.logCheckIn(chip, DateTime.Now));
+    }
+
+    public MainWindowViewModel() {
         db = new DatabaseInterface("checkIO.db");
         List<String> employees = db.getActiveEmployees(DateTime.Now.AddDays(-1));
-        this.view = view;
+        ChipReader.focusWindow(MainWindow.instance);
+        ChipReader.addChipReaderEventHandler(onChipRead);
     }
 
     public void logIn() {
         if(adminPanelOpen) return;
-        LogInWindow logInWindow = new LogInWindow(db, view);
-        logInWindow.Show(view);
+        LogInWindow logInWindow = new LogInWindow(db);
+        logInWindow.Show(MainWindow.instance);
         adminPanelOpen = true;
+    }
+
+    public void readChip() {
+        ChipReader.readChip("123456789");
     }
 }

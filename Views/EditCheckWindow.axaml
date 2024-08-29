@@ -7,7 +7,9 @@
         x:DataType="vm:EditCheckWindowViewModel"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Izmeni čekiranje">
+        Title="Izmeni čekiranje"
+        SizeToContent="WidthAndHeight"
+        CanResize="False">
         
     <Border BorderThickness="1 0 1 1" BorderBrush="Gray">
         <StackPanel>

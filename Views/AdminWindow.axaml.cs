@@ -7,11 +7,10 @@ using CheckInOut2.ViewModels;
 namespace CheckInOut2.Views;
 
 partial class AdminWindow : Window {
-    public AdminWindow(int permission, MainWindow mainWindow, DatabaseInterface db) {
+    public AdminWindow(int permission, DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
         DataContext = new AdminWindowViewModel(this, db);
-        SizeToContent = SizeToContent.WidthAndHeight;
-
+        
         if((permission & 1) == 0) this.FindControl<Button>("addWorker")!.IsEnabled = false;
         if((permission & 2) == 0) this.FindControl<Button>("checkWorker")!.IsEnabled = false;
         if((permission & 4) == 0) this.FindControl<Button>("editWorker")!.IsEnabled = false;
@@ -21,6 +20,6 @@ partial class AdminWindow : Window {
         if((permission & 64) == 0) this.FindControl<Button>("editUser")!.IsEnabled = false;
         if((permission & 128) == 0) this.FindControl<Button>("closeProgram")!.IsEnabled = false;
 
-        Closing += (sender, e) => (mainWindow.DataContext as MainWindowViewModel).adminPanelClosed();
+        Closing += (sender, e) => (MainWindow.instance.DataContext as MainWindowViewModel).adminPanelClosed();
     }
 }

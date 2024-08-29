@@ -7,7 +7,7 @@ namespace CheckInOut2.ViewModels;
 class AddWorkerWindowViewModel {
     public string firstName {get;set;}
     public string lastName {get;set;}
-    public string chip {get;set;}
+    public string chip {get;set;} = "Čip: ";
 
     private DatabaseInterface db;
 
@@ -22,7 +22,6 @@ class AddWorkerWindowViewModel {
     }
 
     public AddWorkerWindowViewModel(DatabaseInterface db) {
-        chip = "Čip: 123456789";
         this.db = db;
     }
 }

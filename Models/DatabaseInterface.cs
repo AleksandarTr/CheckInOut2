@@ -103,13 +103,8 @@ public class DatabaseInterface {
 
         SqliteCommand checkUserTable = connection.CreateCommand();
         checkUserTable.CommandText = "Select username, password, chip, permission from Users";
-        try {
-            checkUserTable.ExecuteNonQuery();
-        }
-        catch (SqliteException)
-        {
-            updateDatabase();
-        }
+        try { checkUserTable.ExecuteNonQuery(); }
+        catch (SqliteException){ updateDatabase(); }
 
         return result;
     }
@@ -131,7 +126,7 @@ public class DatabaseInterface {
             }
         }
 
-        if(!checkDatabase()); //TODO: Add database repair
+        checkDatabase();
     }
 
     public String logCheckIn(String chip, DateTime time) {

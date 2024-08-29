@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using CheckInOut2.Models;
 using MsBox.Avalonia;
 
@@ -25,10 +26,11 @@ class ExportWindowViewModel {
 
     private void exportCSV(List<Check> checks, string fileName) {
         if(!Directory.Exists("izvestaji")) Directory.CreateDirectory("izvestaji");
-        StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}.csv");
+        StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}Log-{fileName}.csv");
 
         DateTime date = DateTime.MinValue;
         List<Check> unmatched = new List<Check>();
+        Dictionary<Worker, int> minutes = new Dictionary<Worker, int>();
         log.WriteLine("Ime i prezime,Dolazak,Odlazak,Datum");
 
         foreach (Check check in checks) {
@@ -42,24 +44,36 @@ class ExportWindowViewModel {
             Check? match = unmatched.Find(unmatchedCheck => unmatchedCheck.worker.id == check.worker.id);
             if(match == null) unmatched.Add(check);
             else {
+                int time = (check.time.Hour - match.time.Hour) * 60 + check.time.Minute - match.time.Minute;
+                if(minutes.ContainsKey(match.worker)) minutes[match.worker] += time;
+                else minutes.Add(match.worker, time);
+
                 log.WriteLine($"{match.worker.firstName} {match.worker.lastName},{match.time:HH:mm},{check.time:HH:mm},{check.time:dd.MM.yyyy}");
                 unmatched.Remove(match);
             }
         }
 
         foreach (Check unmatchedCheck in unmatched) 
-                    log.WriteLine($"{unmatchedCheck.worker.firstName} {unmatchedCheck.worker.lastName},{unmatchedCheck.time:HH:mm},,{unmatchedCheck.time:dd.MM.yyyy}");
+            log.WriteLine($"{unmatchedCheck.worker.firstName} {unmatchedCheck.worker.lastName},{unmatchedCheck.time:HH:mm},,{unmatchedCheck.time:dd.MM.yyyy}");
 
         log.Close();
+
+        StreamWriter hours = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}Sati-{fileName}.csv");
+        hours.WriteLine("Ime i prezime,sati,minuti");
+        foreach(KeyValuePair<Worker, int> entry in minutes.OrderBy(entry => entry.Key.firstName + entry.Key.lastName)) 
+            hours.WriteLine($"{entry.Key.firstName} {entry.Key.lastName},{entry.Value / 60},{entry.Value % 60}");
+        hours.Close();
     }
 
     private void exportTXT(List<Check> checks, string fileName) {
         if(!Directory.Exists("izvestaji")) Directory.CreateDirectory("izvestaji");
-        StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}.txt");
+        StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}Log-{fileName}.txt");
 
         DateTime date = DateTime.MinValue;
         List<Check> unmatched = new List<Check>();
+        Dictionary<Worker, int> minutes = new Dictionary<Worker, int>();
         bool first = true;
+
         foreach (Check check in checks) {
             if (check.time.Date != date.Date) {
                 foreach (Check unmatchedCheck in unmatched) 
@@ -73,6 +87,10 @@ class ExportWindowViewModel {
             Check? match = unmatched.Find(unmatchedCheck => unmatchedCheck.worker.id == check.worker.id);
             if(match == null) unmatched.Add(check);
             else {
+                int time = (check.time.Hour - match.time.Hour) * 60 + check.time.Minute - match.time.Minute;
+                if(minutes.ContainsKey(match.worker)) minutes[match.worker] += time;
+                else minutes.Add(match.worker, time);
+
                 log.WriteLine($"{match.worker.firstName} {match.worker.lastName} {match.time:HH:mm}-{check.time:HH:mm}");
                 unmatched.Remove(match);
             }
@@ -80,8 +98,12 @@ class ExportWindowViewModel {
 
         foreach (Check unmatchedCheck in unmatched) 
                     log.WriteLine($"{unmatchedCheck.worker.firstName} {unmatchedCheck.worker.lastName} {unmatchedCheck.time:HH:mm}-...");
-
         log.Close();
+
+        StreamWriter hours = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}Sati-{fileName}.txt");
+        foreach(KeyValuePair<Worker, int> entry in minutes.OrderBy(entry => entry.Key.firstName + entry.Key.lastName)) 
+            hours.WriteLine($"{entry.Key.firstName} {entry.Key.lastName} {entry.Value / 60}h {entry.Value % 60}m");
+        hours.Close();
     }
 
     public void export() {
@@ -109,9 +131,9 @@ class ExportWindowViewModel {
         else period = ExportPeriod.Day;
 
         string fileName = period switch {
-            ExportPeriod.Year => $"Log-{_year:0000}",
-            ExportPeriod.Month => $"Log-{_year:0000}-{_month:00}",
-            _ => $"Log-{_year:0000}-{_month:00}-{_day:00}",
+            ExportPeriod.Year => $"{_year:0000}",
+            ExportPeriod.Month => $"{_year:0000}-{_month:00}",
+            _ => $"{_year:0000}-{_month:00}-{_day:00}",
         };
 
         List<Check> checks = db.getChecks(new DateTime(_year, _month, _day), period);

@@ -8,6 +8,6 @@ namespace CheckInOut2.Views;
 partial class ExportWindow : Window {
     public ExportWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
-        SizeToContent = SizeToContent.WidthAndHeight;
+        DataContext = new ExportWindowViewModel(db);
     }
 }

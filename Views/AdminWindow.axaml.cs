@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using CheckInOut2.Models;
 using CheckInOut2.ViewModels;
@@ -7,9 +9,51 @@ using CheckInOut2.ViewModels;
 namespace CheckInOut2.Views;
 
 partial class AdminWindow : Window {
+    private DatabaseInterface db;
+
+    public void closeAppClick(object sender, RoutedEventArgs args) {
+        IClassicDesktopStyleApplicationLifetime desktop = (Application.Current!.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!;
+        desktop?.Shutdown();
+    }
+
+    public void addWorkerClick(object sender, RoutedEventArgs args) {
+        AddWorkerWindow addWorkerWindow = new AddWorkerWindow(db);
+        addWorkerWindow.Show(this);
+    }
+
+    public void editWorkerClick(object sender, RoutedEventArgs args) {
+        EditWorkerWindow editWorkerWindow = new EditWorkerWindow(db);
+        editWorkerWindow.Show(this);
+    }
+
+    public void checkWorkerClick(object sender, RoutedEventArgs args) {
+        WorkerCheckWindow workerCheckWindow = new WorkerCheckWindow(db);
+        workerCheckWindow.Show(this);
+    }
+
+    public void editCheckClick(object sender, RoutedEventArgs args) {
+        EditCheckWindow editCheckWindow = new EditCheckWindow(db);
+        editCheckWindow.Show(this);
+    }
+
+    public void exportClick(object sender, RoutedEventArgs args) {
+        ExportWindow exportWorkerWindow = new ExportWindow(db);
+        exportWorkerWindow.Show(this);
+    }
+
+    public void addUserClick(object sender, RoutedEventArgs args) {
+        AddUserWindow addUserWindow = new AddUserWindow(db);
+        addUserWindow.Show(this);
+    }
+
+    public void editUserClick(object sender, RoutedEventArgs args) {
+        EditUserWindow editUserWindow = new EditUserWindow(db);
+        editUserWindow.Show(this);
+    }
+
     public AdminWindow(int permission, DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
-        DataContext = new AdminWindowViewModel(this, db);
+        this.db = db;
 
         if((permission & 1) == 0) this.FindControl<Button>("addWorker")!.IsEnabled = false;
         if((permission & 2) == 0) this.FindControl<Button>("checkWorker")!.IsEnabled = false;

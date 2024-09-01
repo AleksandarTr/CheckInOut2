@@ -38,7 +38,7 @@ class LogInWindowViewModel {
         this.db = db;
     }
 
-    public void logIn(object view) {
+    public void logIn(Window view) {
         string[] chipParts = chip.Split(' ');
         int permission = db.checkCertification(username, ComputeSha256Hash(password), chipParts.Length > 1 ? chipParts[1] : "");
 
@@ -50,7 +50,7 @@ class LogInWindowViewModel {
         }
 
         AdminWindow adminWindow = new AdminWindow(permission, db);
-        adminWindow.Show(((view as LogInWindow)!.Owner as Window)!);
-        (view as Window)!.Close();  
+        adminWindow.Show((view.Owner as Window)!);
+        view.Close();  
     }
 }

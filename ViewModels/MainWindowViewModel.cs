@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using Avalonia.Controls;
 using CheckInOut2.Models;
 using CheckInOut2.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,10 +32,10 @@ public partial class MainWindowViewModel : ObservableObject
         this.db = db;
     }
 
-    public void logIn(object view) {
+    public void logIn(Window view) {
         if(adminPanelOpen) return;
         LogInWindow logInWindow = new LogInWindow(db);
-        logInWindow.Show((view as MainWindow)!);
+        logInWindow.Show(view);
         adminPanelOpen = true;
     }
 

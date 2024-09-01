@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="CheckInOut2.Views.AdminWindow"
-        x:DataType="vm:AdminWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="Admin"
         SizeToContent="WidthAndHeight"
@@ -13,14 +12,14 @@
 
     <Border BorderBrush="Gray" BorderThickness="2 0 2 2">
         <StackPanel>
-            <Button Name="addWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj radnika" Margin="10, 5, 10, 5" Command="{Binding addWorker}"/>
-            <Button Name="checkWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Čekiraj radnika" Margin="10, 5, 10, 5" Command="{Binding checkWorker}"/>
-            <Button Name="editWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Podesi radnika" Margin="10, 5, 10, 5" Command="{Binding editWorker}"/>
-            <Button Name="exportActivity" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izvezi aktivnosti" Margin="10, 5, 10, 5" Command="{Binding export}"/>
-            <Button Name="editCheck" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni čekiranje" Margin="10, 5, 10, 5" Command="{Binding editCheck}"/>
-            <Button Name="addUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj korisnika" Margin="10, 5, 10, 5" Command="{Binding addUser}"/>
-            <Button Name="editUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni korisnika" Margin="10, 5, 10, 5" Command="{Binding editUser}"/>
-            <Button Name="closeProgram" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Zatvori program" Margin="10, 5, 10, 5" Command="{Binding closeApp}"/>
+            <Button Name="addWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj radnika" Margin="10, 5, 10, 5" Click="addWorkerClick"/>
+            <Button Name="checkWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Čekiraj radnika" Margin="10, 5, 10, 5" Click="checkWorkerClick"/>
+            <Button Name="editWorker" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Podesi radnika" Margin="10, 5, 10, 5" Click="editWorkerClick"/>
+            <Button Name="exportActivity" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izvezi aktivnosti" Margin="10, 5, 10, 5" Click="exportClick"/>
+            <Button Name="editCheck" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni čekiranje" Margin="10, 5, 10, 5" Click="editCheckClick"/>
+            <Button Name="addUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Dodaj korisnika" Margin="10, 5, 10, 5" Click="addUserClick"/>
+            <Button Name="editUser" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Izmeni korisnika" Margin="10, 5, 10, 5" Click="editUserClick"/>
+            <Button Name="closeProgram" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Zatvori program" Margin="10, 5, 10, 5" Click="closeAppClick"/>
         </StackPanel>
     </Border>
 </Window>

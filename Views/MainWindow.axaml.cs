@@ -1,20 +1,25 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using CheckInOut2.Models;
 using CheckInOut2.ViewModels;
 
 namespace CheckInOut2.Views;
 
 public partial class MainWindow : Window
 {
-    static private MainWindow? _instance;
-    static public MainWindow instance { get {return _instance!;} }
+    private DatabaseInterface db;
 
     public bool addMessage(String message) {
         StackPanel? infoBoard = this.FindControl<StackPanel>("informationBoard");
         if(infoBoard == null) return false;
         infoBoard.Children.Add(new TextBlock{Text = message});
         return true;
+    }
+
+    private void onChipRead(string chip) {
+        if(!ChipReader.isFocused(this)) return;
+        addMessage(db.logCheckIn(chip, DateTime.Now));
     }
 
     protected override void OnClosing(WindowClosingEventArgs e) {
@@ -25,8 +30,11 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         AvaloniaXamlLoader.Load(this);
-        MainWindowViewModel viewModel = new MainWindowViewModel();
+        db = new DatabaseInterface("checkIO.db");
+        MainWindowViewModel viewModel = new MainWindowViewModel(db);
         DataContext = viewModel;
-        _instance = this;
+
+        ChipReader.focusWindow(this);
+        ChipReader.addChipReaderEventHandler(onChipRead);
     }
 }

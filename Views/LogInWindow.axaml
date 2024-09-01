@@ -16,7 +16,7 @@
             <TextBox Text="{Binding username}" FontSize="20" Watermark="Korisničko ime" Width="300" Margin="10 5 10 5"/>
             <TextBox Text="{Binding password}" FontSize="20" Watermark="Šifra" PasswordChar="*" Width="300" Margin="10 5 10 5"/>
             <TextBlock Name="chip" FontSize="20" Text="{Binding chip}" Margin="10 5 10 5"/>
-            <Button FontSize="20" HorizontalAlignment="Center" Content="Ulogujte se" Margin="10 5 10 5" Command="{Binding logIn}"/>
+            <Button FontSize="20" HorizontalAlignment="Center" Content="Ulogujte se" Margin="10 5 10 5" Command="{Binding logIn}" CommandParameter="{Binding $parent[Window]}"/>
         </StackPanel>
     </Border>
 

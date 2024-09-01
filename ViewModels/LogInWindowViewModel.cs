@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using Avalonia.Controls;
 using CheckInOut2.Models;
 using CheckInOut2.Views;
 using MsBox.Avalonia;
@@ -17,7 +18,6 @@ class LogInWindowViewModel {
     public static int MAX_PERMISSION = 255;
 
     private DatabaseInterface db;
-    private LogInWindow view;
 
     public static string ComputeSha256Hash(string rawData)
         {
@@ -34,12 +34,11 @@ class LogInWindowViewModel {
             }
         }
 
-    public LogInWindowViewModel(DatabaseInterface db, LogInWindow view) {
+    public LogInWindowViewModel(DatabaseInterface db) {
         this.db = db;
-        this.view = view;
     }
 
-    public void logIn() {
+    public void logIn(object view) {
         string[] chipParts = chip.Split(' ');
         int permission = db.checkCertification(username, ComputeSha256Hash(password), chipParts.Length > 1 ? chipParts[1] : "");
 
@@ -51,7 +50,7 @@ class LogInWindowViewModel {
         }
 
         AdminWindow adminWindow = new AdminWindow(permission, db);
-        adminWindow.Show(MainWindow.instance);
-        view.Close();  
+        adminWindow.Show(((view as LogInWindow)!.Owner as Window)!);
+        (view as Window)!.Close();  
     }
 }

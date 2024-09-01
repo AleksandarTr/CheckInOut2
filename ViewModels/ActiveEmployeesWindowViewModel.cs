@@ -22,7 +22,7 @@ class ActiveEmployeesWindowViewModel : ObservableObject {
         }
         else {
             foreach (String employee in activeEmployees) activeEmployeesWindow.addActiveEmployee(employee);
-            activeEmployeesWindow.Show(MainWindow.instance);
+            activeEmployeesWindow.Show();
         }
     }
 }

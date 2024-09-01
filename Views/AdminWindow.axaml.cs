@@ -20,6 +20,6 @@ partial class AdminWindow : Window {
         if((permission & 64) == 0) this.FindControl<Button>("editUser")!.IsEnabled = false;
         if((permission & 128) == 0) this.FindControl<Button>("closeProgram")!.IsEnabled = false;
 
-        Closing += (sender, e) => (MainWindow.instance.DataContext as MainWindowViewModel)!.adminPanelClosed();
+        Closing += (sender, e) => MainWindowViewModel.adminPanelClosed();
     }
 }

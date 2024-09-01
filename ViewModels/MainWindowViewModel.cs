@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Avalonia.Controls;
 using CheckInOut2.Models;
 using CheckInOut2.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,14 +11,14 @@ public delegate bool ReaderEventHandler(String message);
 public partial class MainWindowViewModel : ObservableObject
 {
     private DatabaseInterface db;
-    private bool adminPanelOpen = false;
-    private bool showActiveEmplyeesOpen = false;
+    static private bool adminPanelOpen = false;
+    static private bool showActiveEmplyeesOpen = false;
 
-    public void adminPanelClosed() {
+    static public void adminPanelClosed() {
         adminPanelOpen = false;
     }
 
-    public void showActiveEmplyeesClosed() {
+    static public void showActiveEmplyeesClosed() {
         showActiveEmplyeesOpen = false;
     }
 
@@ -29,22 +28,14 @@ public partial class MainWindowViewModel : ObservableObject
         new ActiveEmployeesWindow(db);
     }
 
-    private void onChipRead(string chip) {
-        if(!ChipReader.isFocused(MainWindow.instance)) return;
-        MainWindow.instance.addMessage(db.logCheckIn(chip, DateTime.Now));
+    public MainWindowViewModel(DatabaseInterface db) {
+        this.db = db;
     }
 
-    public MainWindowViewModel() {
-        db = new DatabaseInterface("checkIO.db");
-        List<String> employees = db.getActiveEmployees(DateTime.Now.AddDays(-1));
-        ChipReader.focusWindow(MainWindow.instance);
-        ChipReader.addChipReaderEventHandler(onChipRead);
-    }
-
-    public void logIn() {
+    public void logIn(object view) {
         if(adminPanelOpen) return;
         LogInWindow logInWindow = new LogInWindow(db);
-        logInWindow.Show(MainWindow.instance);
+        logInWindow.Show((view as MainWindow)!);
         adminPanelOpen = true;
     }
 

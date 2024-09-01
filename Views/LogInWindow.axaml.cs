@@ -15,14 +15,14 @@ partial class LogInWindow : Window {
 
     public LogInWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
-        DataContext= new LogInWindowViewModel(db, this);
+        DataContext= new LogInWindowViewModel(db);
 
         ChipReader.addChipReaderEventHandler(onChipRead);
         ChipReader.focusWindow(this);
         Closing += (sender, e) => {
-            if(!e.IsProgrammatic) (MainWindow.instance.DataContext as MainWindowViewModel)!.adminPanelClosed();
+            if(!e.IsProgrammatic) MainWindowViewModel.adminPanelClosed();
             ChipReader.removeChipReaderEventHandler(onChipRead);
-            ChipReader.focusWindow(MainWindow.instance);
+            ChipReader.unfocus();
         };
     }
 }

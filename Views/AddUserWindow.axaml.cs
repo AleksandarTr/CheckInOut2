@@ -20,7 +20,7 @@ partial class AddUserWindow : Window {
         ChipReader.focusWindow(this);
         Closing += (o, sender) => {
             ChipReader.removeChipReaderEventHandler(onChipRead);
-            ChipReader.focusWindow(MainWindow.instance);
+            ChipReader.unfocus();
         };
     }
 }

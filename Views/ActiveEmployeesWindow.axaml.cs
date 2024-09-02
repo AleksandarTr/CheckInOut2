@@ -20,17 +20,22 @@ partial class ActiveEmployeesWindow : Window {
 
     public ActiveEmployeesWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
-        Closing += (sender, e) => MainWindowViewModel.showActiveEmplyeesClosed();
+        Closing += (sender, e) => {
+            MainWindowViewModel.showActiveEmplyeesClosed();
+            Logger.log("ActiveEmployeesWindow closed");
+        };
 
         List<String> activeEmployees = db.getActiveEmployees(DateTime.Now);
         if(activeEmployees.Count == 0) {
             MessageBoxManager.GetMessageBoxStandard("Nema radnika", "Trenutno nijedan radnik nije na poslu.", 
             MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
             Close();
+            Logger.log("No active employees shown");
         }
         else {
             foreach (String employee in activeEmployees) addActiveEmployee(employee);
             Show();
+            Logger.log("ActiveEmployeesWindow opened");
         }
     }
 }

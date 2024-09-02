@@ -43,12 +43,14 @@ class LogInWindowViewModel {
         int permission = db.checkCertification(username, ComputeSha256Hash(password), chipParts.Length > 1 ? chipParts[1] : "");
 
         if(permission == 0) {
+            Logger.log($"Failed login: {username},####,{chip}");
             MessageBoxManager.GetMessageBoxStandard("Neuspešna prijava", 
                 "Ne postoji korisnik sa datom kombinacijom šifre i korisničkog imena.", 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
 
+        Logger.log($"Logged in as {username}");
         AdminWindow adminWindow = new AdminWindow(permission, db);
         adminWindow.Show((view.Owner as Window)!);
         view.Close();  

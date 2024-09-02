@@ -84,7 +84,8 @@ class EditCheckWindowViewModel : INotifyPropertyChanged {
             if(month < 1 || month > 12) return;
             if(year < 2000) return;
             checkInfo = db.getChecks(new DateTime(year, month, day));
-            checkInfo.ForEach(check => checks.Add($"{check.time.ToString("HH:mm")}-{check.worker.firstName.First()}{check.worker.lastName.First()}"));
+            checkInfo.ForEach(check => checks.Add($"{check.time:HH:mm}-{check.worker.firstName.First()}{check.worker.lastName.First()}"));
+            Logger.log($"Loaded checks for {year}.{month}.{day}");
         }
     }
 
@@ -93,48 +94,61 @@ class EditCheckWindowViewModel : INotifyPropertyChanged {
         name = checkInfo[check].worker.firstName + " " + checkInfo[check].worker.lastName;
         hour = checkInfo[check].time.Hour.ToString();
         minute = checkInfo[check].time.Minute.ToString();
+        Logger.log($"Selected check: {checks[check]}");
     }
 
     public void saveCheck() {
         if(check < 0 || check >= checks.Count) {
+            Logger.log("Failed saving: no check selected");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Nije izabrano čekiranje.", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
         if(!int.TryParse(this.day, out int day) || !int.TryParse(this.month, out int month) || !int.TryParse(this.year, out int year) || !int.TryParse(this.hour, out int hour) || !int.TryParse(this.minute, out int minute)) {
+            Logger.log("Failed saving: no date/time entered");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Nije unesen pravilan datum i vreme", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
         if(hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+            Logger.log("Failed saving: invalid time");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Uneseno je nekorektno vreme", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
         if(db.editCheck(checkInfo[check].id, new DateTime(year, month, day, hour, minute, 0))) {
+            Logger.log($"Saved check for {checkInfo[check].worker.firstName} {checkInfo[check].worker.lastName} from {checkInfo[check].time:HH:mm} to {hour}:{minute} {day}.{month}.{year}");
             MessageBoxManager.GetMessageBoxStandard("Promenjeno", 
                 $"Uspešno je promenjeno čekiranje za {checkInfo[check].worker.firstName} {checkInfo[check].worker.lastName} na {hour}:{minute} {day}.{month}.{year}.",
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
             checkInfo[check].time = new DateTime(year, month, day, hour, minute, 0);
             checks[check] = $"{hour:00}:{minute:00}-{checkInfo[check].worker.firstName.First()}{checkInfo[check].worker.lastName.First()}";
         }
-        else MessageBoxManager.GetMessageBoxStandard("Greška", 
+        else {
+            MessageBoxManager.GetMessageBoxStandard("Greška", 
                 $"Nije moglo da se promeni vreme čekiranja za {checkInfo[check].worker.firstName} {checkInfo[check].worker.lastName}.",
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+            Logger.log("Failed saving: unknown error");
+        }
     }
 
     public void deleteCheck(){
         if(check < 0 || check >= checks.Count) {
+            Logger.log("Failed deleting: No check selected");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Nije izabrano čekiranje.", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
         if(db.deleteCheck(checkInfo[check].id)) {
+            Logger.log($"Deleted check for {checkInfo[check].worker.firstName} {checkInfo[check].worker.lastName} at {checkInfo[check].time:yyyy.MM.dd-HH:mm}");
             MessageBoxManager.GetMessageBoxStandard("Promenjeno", 
                 $"Uspešno je izbrisano čekiranje za {checkInfo[check].worker.firstName} {checkInfo[check].worker.lastName}.",
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
             checkInfo.RemoveAt(check);
             checks.RemoveAt(check);
         }
-        else MessageBoxManager.GetMessageBoxStandard("Greška", 
+        else {
+            Logger.log("Failed deleting: unknonw error");
+            MessageBoxManager.GetMessageBoxStandard("Greška", 
                 $"Nije moglo da se izbriše čekiranje za {checkInfo[check].worker.firstName} {checkInfo[check].worker.lastName}.",
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

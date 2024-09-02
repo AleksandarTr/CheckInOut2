@@ -13,11 +13,13 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     private const uint RID_INPUT = 0x10000003;
     private IntPtr _originalWndProc;
     private IntPtr _hwnd;
+    private WndProcDelegate wndProcMethod;
 
     public WindowsHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter, ulong hardwareID)
      : base(buffer, checkBufferWaiter, hardwareID) {
         _hwnd = FindWindow(null, "CheckInOut2");
-        _originalWndProc = SetWindowLongPtr(_hwnd, GWL_WNDPROC, WndProc);
+        wndProcMethod = WndProc;
+        _originalWndProc = SetWindowLongPtr(_hwnd, GWL_WNDPROC, wndProcMethod);
         RegisterRawInput();
     }
 

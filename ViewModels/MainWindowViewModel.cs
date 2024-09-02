@@ -38,8 +38,4 @@ public partial class MainWindowViewModel : ObservableObject
         logInWindow.Show(view);
         adminPanelOpen = true;
     }
-
-    public void readChip() {
-        ChipReader.readChip("123456789");
-    }
 }

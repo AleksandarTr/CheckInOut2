@@ -21,6 +21,9 @@ partial class AddUserWindow : Window {
         Closing += (o, sender) => {
             ChipReader.removeChipReaderEventHandler(onChipRead);
             ChipReader.unfocus();
+            Logger.log("AddUserWindow closed");
         };
+
+        Logger.log("AddUserWindow opened");
     }
 }

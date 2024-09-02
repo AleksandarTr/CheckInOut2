@@ -11,6 +11,7 @@ public partial class MainWindow : Window
     private DatabaseInterface db;
 
     public bool addMessage(String message) {
+        Logger.log("Added message:" + message);
         StackPanel? infoBoard = this.FindControl<StackPanel>("informationBoard");
         if(infoBoard == null) return false;
         infoBoard.Children.Add(new TextBlock{Text = message});
@@ -24,6 +25,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(WindowClosingEventArgs e) {
         e.Cancel = true;
+        Logger.log($"Application closed at {DateTime.Now:dd.MM.yyyy-HH:mm}");
         base.OnClosing(e);
     }
 
@@ -36,5 +38,6 @@ public partial class MainWindow : Window
 
         ChipReader.focusWindow(this);
         ChipReader.addChipReaderEventHandler(onChipRead);
+        Logger.log("Main window opened");
     }
 }

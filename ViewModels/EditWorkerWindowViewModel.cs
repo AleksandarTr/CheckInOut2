@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
-using Avalonia.Controls;
 using CheckInOut2.Models;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using MsBox.Avalonia;
@@ -78,15 +73,19 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
         firstName = workers[worker].firstName;
         lastName = workers[worker].lastName;
         chip = "Čip: " + workers[worker].chip;
+        Logger.log($"Worker selected: {names[worker]}");
     }
 
     public void saveWorker() {
         string[] chipParts = chip.Split(' ');
         string error = "Nijedno polje ne može da bude prazno!";
-        if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !db.editWorker(workers[worker].id, firstName, lastName, chipParts[1], ref error)) 
+        if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !db.editWorker(workers[worker].id, firstName, lastName, chipParts[1], ref error)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", error, 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+            Logger.log($"Failed saving({firstName},{lastName},{chip}): {error}");
+        }
         else {
+            Logger.log($"Changed worker from ({workers[worker].firstName},{workers[worker].lastName},{workers[worker].chip}) to ({firstName},{lastName},{chipParts[1]})");
             MessageBoxManager.GetMessageBoxStandard("Izmenjen", $"Uspešno je izmenjen radnik i sada je {firstName} {lastName} sa brojem čipa {chipParts[1]}.", 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
             int index = worker;

@@ -23,6 +23,9 @@ partial class LogInWindow : Window {
             if(!e.IsProgrammatic) MainWindowViewModel.adminPanelClosed();
             ChipReader.removeChipReaderEventHandler(onChipRead);
             ChipReader.unfocus();
+            Logger.log("LoginWindow closed");
         };
+
+        Logger.log("LogInWindow opened");
     }
 }

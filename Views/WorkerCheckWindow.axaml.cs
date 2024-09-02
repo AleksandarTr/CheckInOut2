@@ -9,5 +9,7 @@ partial class WorkerCheckWindow : Window {
     public WorkerCheckWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
         DataContext = new WorkerCheckWindowViewModel(db);
+        Logger.log("WorkerCheckWindow opened");
+        Closing += (s, e) => Logger.log("WorkerCheckWindow closed");
     }
 }

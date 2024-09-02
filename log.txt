@@ -1,0 +1,76 @@
+
+Application started at 02.09.2024-08:00
+Main window opened
+
+Application started at 02.09.2024-08:02
+Main window opened
+
+Application started at 02.09.2024-20:06
+Main window opened
+
+Application started at 02.09.2024-20:15
+Main window opened
+:System.UnhandledExceptionEventArgs
+
+Application started at 02.09.2024-20:17
+Main window opened
+:System.Exception: Test
+   at CheckInOut2.Views.MainWindow..ctor() in D:\Data\random\projects\CheckInOut2\Views\MainWindow.axaml.cs:line 41
+   at CheckInOut2.App.OnFrameworkInitializationCompleted() in D:\Data\random\projects\CheckInOut2\App.axaml.cs:line 26
+   at Avalonia.AppBuilder.SetupUnsafe()
+   at Avalonia.AppBuilder.Setup()
+   at Avalonia.AppBuilder.SetupWithLifetime(IApplicationLifetime lifetime)
+   at Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(AppBuilder builder, String[] args, Action`1 lifetimeBuilder)
+   at CheckInOut2.Program.Main(String[] args) in D:\Data\random\projects\CheckInOut2\Program.cs:line 12
+
+Application started at 02.09.2024-20:56
+Main window opened
+:System.Exception: Test
+   at CheckInOut2.Views.MainWindow..ctor() in D:\Data\random\projects\CheckInOut2\Views\MainWindow.axaml.cs:line 42
+   at CheckInOut2.App.OnFrameworkInitializationCompleted() in D:\Data\random\projects\CheckInOut2\App.axaml.cs:line 26
+   at Avalonia.AppBuilder.SetupUnsafe()
+   at Avalonia.AppBuilder.Setup()
+   at Avalonia.AppBuilder.SetupWithLifetime(IApplicationLifetime lifetime)
+   at Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(AppBuilder builder, String[] args, Action`1 lifetimeBuilder)
+   at CheckInOut2.Program.Main(String[] args) in D:\Data\random\projects\CheckInOut2\Program.cs:line 12
+
+Application started at 02.09.2024-20:56
+Main window opened
+LogInWindow opened
+Logged in as admin
+AdminWindow opened
+LoginWindow closed
+ExportWindow opened
+
+Application started at 02.09.2024-21:00
+Main window opened
+LogInWindow opened
+Logged in as admin
+AdminWindow opened
+LoginWindow closed
+ExportWindow opened
+Exported txt log
+Exported txt hour log
+ExportWindow closed
+EditWorkerWindow opened
+Worker selected: Aleksandar Trajković
+EditWorkerWindow closed
+Loaded checks for 2024.9.2
+EditCheckWindow opened
+Loaded checks for 2024.9.2
+Loaded checks for 2024.9.26
+Loaded checks for 2024.8.26
+Selected check: 11:20-LT
+EditCheckWindow closed
+AdminWindow closed
+Application closed
+
+Application started at 02.09.2024-21:03
+Main window opened
+LogInWindow opened
+Logged in as admin
+AdminWindow opened
+LoginWindow closed
+Manual application shutdown
+AdminWindow closed
+Application closed at 02.09.2024-21:03

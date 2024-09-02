@@ -9,5 +9,7 @@ partial class ExportWindow : Window {
     public ExportWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
         DataContext = new ExportWindowViewModel(db);
+        Logger.log("ExportWindow opened");
+        Closing += (s, o) => Logger.log("ExportWindow closed");
     }
 }

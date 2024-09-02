@@ -30,16 +30,22 @@ class AddUserWindowViewModel{
 
         string[] chipParts = chip.Split(" ");
         if(username.Length == 0 || password.Length == 0 || chipParts.Length < 2) {
+            Logger.log("Failed to add user becuase of empty field.");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Nijedno polje ne može da bude prazno.", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
         string hashedPassword = LogInWindowViewModel.ComputeSha256Hash(password);
 
         string error = "";
-        if(!db.addUser(username, hashedPassword, chipParts[1], permission, ref error))
+        if(!db.addUser(username, hashedPassword, chipParts[1], permission, ref error)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", error, MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
-        else MessageBoxManager.GetMessageBoxStandard("Dodat korisnik", $"Uspešno je dodat radnik sa korisničkim imenom {username} i čipom {chipParts[1]}", 
-            MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            Logger.log($"Failed to add user({username},{hashedPassword},{chipParts[1]},{permission}): {error}");
+        }
+        else {
+            MessageBoxManager.GetMessageBoxStandard("Dodat korisnik", $"Uspešno je dodat radnik sa korisničkim imenom {username} i čipom {chipParts[1]}", 
+                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            Logger.log($"Added user: {username},{hashedPassword},{chipParts[1]},{permission}");
+        }
     }
 
     public AddUserWindowViewModel(DatabaseInterface db) {

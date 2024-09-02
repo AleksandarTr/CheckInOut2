@@ -12,6 +12,7 @@ partial class AdminWindow : Window {
     private DatabaseInterface db;
 
     public void closeAppClick(object sender, RoutedEventArgs args) {
+        Logger.log("Manual application shutdown");
         IClassicDesktopStyleApplicationLifetime desktop = (Application.Current!.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!;
         desktop?.Shutdown();
     }
@@ -64,6 +65,10 @@ partial class AdminWindow : Window {
         if((permission & 64) == 0) this.FindControl<Button>("editUser")!.IsEnabled = false;
         if((permission & 128) == 0) this.FindControl<Button>("closeProgram")!.IsEnabled = false;
 
-        Closing += (sender, e) => MainWindowViewModel.adminPanelClosed();
+        Closing += (sender, e) => {
+            MainWindowViewModel.adminPanelClosed();
+            Logger.log("AdminWindow closed");
+        };
+        Logger.log("AdminWindow opened");
     }
 }

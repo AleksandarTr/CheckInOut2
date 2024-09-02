@@ -113,6 +113,7 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
         addUser = (userList[user].permission & 32) != 0;
         editUser = (userList[user].permission & 64) != 0;
         close = (userList[user].permission & 128) != 0;
+        Logger.log($"Selected user {users[user]}");
     }
 
     public void saveUser() {
@@ -132,9 +133,12 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
         string hashedPassword = LogInWindowViewModel.ComputeSha256Hash(password);
 
         if(error.Length == 0) db.editUser(userList[user].username, username, hashedPassword, chipParts[1], permission, ref error);
-        if(error.Length != 0)
+        if(error.Length != 0){
             MessageBoxManager.GetMessageBoxStandard("Greška", error, MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+            Logger.log($"Failed saving: {error}");
+        }
         else {
+            Logger.log($"Changed user from ({userList[user].username},#####,{userList[user].chip},{userList[user].permission}) to ({username},{hashedPassword},{chipParts[1]},{permission})");
             MessageBoxManager.GetMessageBoxStandard("Promenjen korisnik", "Uspešno je izmenjen korisnik", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
             userList[user].username = username;
             userList[user].chip = chipParts[1];

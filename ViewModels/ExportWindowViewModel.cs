@@ -57,12 +57,14 @@ class ExportWindowViewModel {
             log.WriteLine($"{unmatchedCheck.worker.firstName} {unmatchedCheck.worker.lastName},{unmatchedCheck.time:HH:mm},,{unmatchedCheck.time:dd.MM.yyyy}");
 
         log.Close();
+        Logger.log("Exported csv log");
 
         StreamWriter hours = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}Sati-{fileName}.csv");
         hours.WriteLine("Ime i prezime,sati,minuti");
         foreach(KeyValuePair<Worker, int> entry in minutes.OrderBy(entry => entry.Key.firstName + entry.Key.lastName)) 
             hours.WriteLine($"{entry.Key.firstName} {entry.Key.lastName},{entry.Value / 60},{entry.Value % 60}");
         hours.Close();
+        Logger.log("Exported csv hour log");
     }
 
     private void exportTXT(List<Check> checks, string fileName) {
@@ -99,15 +101,18 @@ class ExportWindowViewModel {
         foreach (Check unmatchedCheck in unmatched) 
                     log.WriteLine($"{unmatchedCheck.worker.firstName} {unmatchedCheck.worker.lastName} {unmatchedCheck.time:HH:mm}-...");
         log.Close();
+        Logger.log("Exported txt log");
 
         StreamWriter hours = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}Sati-{fileName}.txt");
         foreach(KeyValuePair<Worker, int> entry in minutes.OrderBy(entry => entry.Key.firstName + entry.Key.lastName)) 
             hours.WriteLine($"{entry.Key.firstName} {entry.Key.lastName} {entry.Value / 60}h {entry.Value % 60}m");
         hours.Close();
+        Logger.log("Exported txt hour log");
     }
 
     public void export() {
         if(format < 0 || format > _formats.Count) {
+            Logger.log("Failed exporting: No format selected");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Niste izabrali korektan format.", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
@@ -116,6 +121,7 @@ class ExportWindowViewModel {
         if((day.Length != 0 && (!int.TryParse(day, out _day) || _day < 1 || _day > 31)) || 
            (month.Length != 0 && (!int.TryParse(month, out _month) || _month < 1 || _month > 12)) || 
            !int.TryParse(year, out _year) || _year < 2000) {
+            Logger.log($"Failed exporting: invalid date({year}.{month}.{day})");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Niste uneli pravilan datum!", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
         }
@@ -124,6 +130,7 @@ class ExportWindowViewModel {
         if (month.Length == 0 && day.Length == 0) period = ExportPeriod.Year;
         else if (day.Length == 0) period = ExportPeriod.Month;
         else if (month.Length == 0) {
+            Logger.log("Failed exporting: Month field empty, while Day field is not");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Polje za mesec ne može da ostane prazno, a da je popunjeno polje za dan.",
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;

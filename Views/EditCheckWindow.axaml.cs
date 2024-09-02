@@ -9,5 +9,7 @@ partial class EditCheckWindow : Window {
     public EditCheckWindow(DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
         DataContext = new EditCheckWindowViewModel(db, this);
+        Logger.log("EditCheckWindow opened");
+        Closing += (o, e) => Logger.log("EditCheckWindow closed");
     }
 }

@@ -52,6 +52,11 @@ partial class AdminWindow : Window {
         editUserWindow.Show(this);
     }
 
+    public void settingsClick(object sender, RoutedEventArgs args) {
+        SettingsWindow editUserWindow = new SettingsWindow();
+        editUserWindow.Show(this);
+    }
+
     public AdminWindow(int permission, DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
         this.db = db;
@@ -64,6 +69,7 @@ partial class AdminWindow : Window {
         if((permission & 32) == 0) this.FindControl<Button>("addUser")!.IsEnabled = false;
         if((permission & 64) == 0) this.FindControl<Button>("editUser")!.IsEnabled = false;
         if((permission & 128) == 0) this.FindControl<Button>("closeProgram")!.IsEnabled = false;
+        if((permission & 256) == 0) this.FindControl<Button>("settings")!.IsEnabled = false;
 
         Closing += (sender, e) => {
             MainWindowViewModel.adminPanelClosed();

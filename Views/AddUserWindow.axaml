@@ -23,6 +23,7 @@
             <CheckBox IsChecked="{Binding editCheck}" Content="Izmeni čekiranje" FontSize="20" Width="300" Margin="10 5 10 5"/>
             <CheckBox IsChecked="{Binding addUser}" Content="Dodaj korisnika" FontSize="20" Width="300" Margin="10 5 10 5"/>
             <CheckBox IsChecked="{Binding editUser}" Content="Izmeni korisnika" FontSize="20" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding settings}" Content="Podešavanja" FontSize="20" Width="300" Margin="10 5 10 5"/>
             <CheckBox IsChecked="{Binding close}" Content="Zatvori program" FontSize="20" Width="300" Margin="10 5 10 5"/>
             <Button Content="Dodaj" HorizontalAlignment="Center" FontSize="20" Margin="10 5 10 5" Command="{Binding onAddUser}"/>
         </StackPanel>

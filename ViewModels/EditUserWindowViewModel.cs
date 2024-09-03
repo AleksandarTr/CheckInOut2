@@ -79,6 +79,13 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
             _close = value;
             OnPropertyChanged();
         }}
+    private bool _settings = false;
+    public bool settings { 
+        get { return _settings; }
+        set { 
+            _settings = value;
+            OnPropertyChanged();
+        }}
     private ObservableCollection<string> _users;
     public ObservableCollection<string> users {
         get { return _users; }
@@ -113,6 +120,7 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
         addUser = (userList[user].permission & 32) != 0;
         editUser = (userList[user].permission & 64) != 0;
         close = (userList[user].permission & 128) != 0;
+        settings = (userList[user].permission & 256) != 0;
         Logger.log($"Selected user {users[user]}");
     }
 
@@ -130,6 +138,7 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
         permission |= addUser ? 32 : 0;
         permission |= editUser ? 64 : 0;
         permission |= close ? 128 : 0;
+        permission |= settings ? 256 : 0;
         string hashedPassword = LogInWindowViewModel.ComputeSha256Hash(password);
 
         if(error.Length == 0) db.editUser(userList[user].username, username, hashedPassword, chipParts[1], permission, ref error);

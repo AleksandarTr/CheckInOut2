@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace CheckInOut2.Models;
 
@@ -11,6 +13,7 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     private const int GWL_WNDPROC = -4;
     private const int RIM_TYPEKEYBOARD = 0x01;
     private const uint RID_INPUT = 0x10000003;
+    private const uint RIDI_DEVICENAME = 0x20000007;
     private IntPtr _originalWndProc;
     private IntPtr _hwnd;
     private WndProcDelegate wndProcMethod;
@@ -116,5 +119,46 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         }
 
         return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct RAWINPUTDEVICELIST {
+        public IntPtr hDevice;
+        public int dwType;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint GetRawInputDeviceList([Out] RAWINPUTDEVICELIST[] pRawInputDeviceList, ref uint puiNumDevices, uint cbSize);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint GetRawInputDeviceInfo(IntPtr hDevice, uint uiCommand, StringBuilder pData, ref uint pcbSize);
+
+    public override List<Device> getDeviceList()
+    {
+        List<Device> devices = new List<Device>();
+
+        uint deviceCount = 0;
+        uint dwSize = (uint) Marshal.SizeOf(typeof(RAWINPUTDEVICELIST));
+        GetRawInputDeviceList(null, ref deviceCount, dwSize);
+
+        RAWINPUTDEVICELIST[] rawDevices = new RAWINPUTDEVICELIST[deviceCount];
+        GetRawInputDeviceList(rawDevices, ref deviceCount, dwSize);
+
+        foreach(RAWINPUTDEVICELIST rawDevice in rawDevices) {
+            if(rawDevice.dwType != RIM_TYPEKEYBOARD) continue;
+            uint nameSize = 0;
+            GetRawInputDeviceInfo(rawDevice.hDevice, RIDI_DEVICENAME, null, ref nameSize);
+
+            if(nameSize > 0) {
+                StringBuilder deviceName = new StringBuilder((int) nameSize);
+                GetRawInputDeviceInfo(rawDevice.hDevice, RIDI_DEVICENAME, deviceName, ref nameSize);
+                devices.Add(new Device() {
+                    name = deviceName.ToString(),
+                    hardwareID = (ulong) rawDevice.hDevice
+                });
+            } 
+        }
+
+        return devices;
     }
 }

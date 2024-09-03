@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Avalonia.Controls;
@@ -15,7 +14,6 @@ public static class ChipReader {
     private static event ChipReaderEventHandler? chipReaderEvent;
     private static Window? activeWindow = null;
     private static List<Window> previouslyFocused = new List<Window>();
-    private static PlatformHardwareReader hardwareReader;
 
     public static void addChipReaderEventHandler(ChipReaderEventHandler chipReaderEventHandler) {
         chipReaderEvent += chipReaderEventHandler;
@@ -48,7 +46,7 @@ public static class ChipReader {
 
     static ChipReader() {
         //#if WINDOWS
-        hardwareReader = new WindowsHardwareReader(buffer, checkBufferWaiter, 0ul);
+        new WindowsHardwareReader(buffer, checkBufferWaiter, ulong.Parse(Settings.get("readerID")!));
         //#endif
     }
 
@@ -60,7 +58,7 @@ public static class ChipReader {
         Thread.Sleep(bufferWaiterTimeout);
         StringBuilder chip = new StringBuilder();
         lock (buffer) {
-            byte charCount = hardwareReader.bufferPtr;
+            byte charCount = PlatformHardwareReader.instance.bufferPtr;
             for(int i = 0; i < charCount; i++) chip.Append(buffer[i]);
             bufferWaiter = null;
         }

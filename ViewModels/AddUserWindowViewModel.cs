@@ -16,6 +16,7 @@ class AddUserWindowViewModel{
     public bool addUser { get; set; } = false;
     public bool editUser { get; set; } = false;
     public bool close { get; set; } = false;
+    public bool settings { get; set; } = false;
     private DatabaseInterface db;
 
     public void onAddUser() {
@@ -27,6 +28,7 @@ class AddUserWindowViewModel{
         permission |= addUser ? 32 : 0;
         permission |= editUser ? 64 : 0;
         permission |= close ? 128 : 0;
+        permission |= settings ? 256 : 0;
 
         string[] chipParts = chip.Split(" ");
         if(username.Length == 0 || password.Length == 0 || chipParts.Length < 2) {

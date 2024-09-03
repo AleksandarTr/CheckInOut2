@@ -15,7 +15,7 @@ class LogInWindowViewModel {
     public string password {get; set;} = "";
     public string chip {get; set;} = "Čip: ";
 
-    public static int MAX_PERMISSION = 255;
+    public static int MAX_PERMISSION = 511;
 
     private DatabaseInterface db;
 

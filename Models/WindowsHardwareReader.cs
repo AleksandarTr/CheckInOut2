@@ -14,6 +14,9 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     private const int RIM_TYPEKEYBOARD = 0x01;
     private const uint RID_INPUT = 0x10000003;
     private const uint RIDI_DEVICENAME = 0x20000007;
+    private const uint FILE_SHARE_READ = 0x00000001;
+    private const uint FILE_SHARE_WRITE = 0x00000002;
+    private const uint OPEN_EXISTING = 3;
     private IntPtr _originalWndProc;
     private IntPtr _hwnd;
     private WndProcDelegate wndProcMethod;
@@ -143,7 +146,7 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     private static extern bool CloseHandle(IntPtr hObject);
 
     private string getHumanReadableName(string path) {
-        IntPtr HIDHandle = CreateFile(path, 0, 0x00000001 | 0x00000002, IntPtr.Zero, 3, 0, IntPtr.Zero);
+        IntPtr HIDHandle = CreateFile(path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
         if(HIDHandle != IntPtr.Zero)
         {
             byte[] buffer = new byte[126];

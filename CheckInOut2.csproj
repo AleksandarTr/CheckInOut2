@@ -12,10 +12,12 @@
 
   <PropertyGroup Condition="'${Configuration}' == 'Linux'">
     <DefineConstants>$(DefineConstants);LINUX</DefineConstants>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'${Configuration}' == 'Windows'">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>

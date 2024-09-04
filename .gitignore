@@ -259,3 +259,5 @@ paket-files/
 checkIO.db
 CheckInOut2.generated.sln
 izvestaji/
+log.txt
+settings.config

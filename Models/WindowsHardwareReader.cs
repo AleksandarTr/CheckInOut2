@@ -133,6 +133,29 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint GetRawInputDeviceInfo(IntPtr hDevice, uint uiCommand, StringBuilder pData, ref uint pcbSize);
 
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr CreateFile(string fileName, uint dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
+
+    [DllImport("hid.dll", SetLastError = true)]
+    private static extern bool HidD_GetProductString(IntPtr HidDeviceObject, byte[] buffer, ulong bufferSize);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool CloseHandle(IntPtr hObject);
+
+    private string getHumanReadableName(string path) {
+        IntPtr HIDHandle = CreateFile(path, 0, 0x00000001 | 0x00000002, IntPtr.Zero, 3, 0, IntPtr.Zero);
+        if(HIDHandle != IntPtr.Zero)
+        {
+            byte[] buffer = new byte[126];
+            bool result = HidD_GetProductString(HIDHandle, buffer, 126);
+            if(!result) return "Nepoznatno ime";
+            CloseHandle(HIDHandle);
+            string name = Encoding.Unicode.GetString(buffer).TrimEnd('\0');
+            if(name.Length > 0) return name;
+        }
+        return "Nepoznatno ime";
+    }
+
     public override List<Device> getDeviceList()
     {
         List<Device> devices = new List<Device>();
@@ -153,7 +176,7 @@ public class WindowsHardwareReader : PlatformHardwareReader {
                 StringBuilder deviceName = new StringBuilder((int) nameSize);
                 GetRawInputDeviceInfo(rawDevice.hDevice, RIDI_DEVICENAME, deviceName, ref nameSize);
                 devices.Add(new Device() {
-                    name = deviceName.ToString(),
+                    name = getHumanReadableName(deviceName.ToString()),
                     hardwareID = (ulong) rawDevice.hDevice
                 });
             } 

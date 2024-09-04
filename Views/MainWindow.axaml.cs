@@ -10,10 +10,11 @@ namespace CheckInOut2.Views;
 public partial class MainWindow : Window
 {
     private DatabaseInterface db;
+    private static MainWindow instance;
 
-    public bool addMessage(String message) {
+    public static bool addMessage(String message) {
         Logger.log("Added message:" + message);
-        StackPanel? infoBoard = this.FindControl<StackPanel>("informationBoard");
+        StackPanel? infoBoard = instance.FindControl<StackPanel>("informationBoard");
         if(infoBoard == null) return false;
         infoBoard.Children.Add(new TextBlock{Text = message});
         return true;
@@ -36,6 +37,7 @@ public partial class MainWindow : Window
         db = new DatabaseInterface("checkIO.db");
         MainWindowViewModel viewModel = new MainWindowViewModel(db);
         DataContext = viewModel;
+        instance = this;
 
         ChipReader.focusWindow(this);
         ChipReader.addChipReaderEventHandler(onChipRead);

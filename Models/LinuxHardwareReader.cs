@@ -48,18 +48,14 @@ public class LinuxHardwareReader : PlatformHardwareReader {
 
         if (fd < 0)
         {
-            Console.WriteLine($"Error opening device:{Marshal.GetLastWin32Error()}.");
+            raiseError($"Nije moglo da se pristupi uređaju({Marshal.GetLastWin32Error()}).");
             return;
         }
 
         // Grab the device
         if (ioctl(fd, EVIOCGRAB, 1) < 0)
-        {
-            Console.WriteLine($"Failed to grab the device:{Marshal.GetLastWin32Error()}.");
-            close(fd);
-            return;
-        }
-
+            raiseError($"Nije moglo da se preuzme vlasništvo nad uređajem({Marshal.GetLastWin32Error()}).");
+    
         PollFd pollfd = new PollFd
         {
             fd = fd,
@@ -140,8 +136,8 @@ public class LinuxHardwareReader : PlatformHardwareReader {
         IntPtr udev = udev_new();
         if (udev == IntPtr.Zero)
         {
-            Console.WriteLine("Failed to create udev context.");
-            return null;
+            raiseError($"Nije moglo da se pristupi listi uređaja({Marshal.GetLastWin32Error()})");
+            return new List<Device>();
         }
 
         IntPtr enumerate = udev_enumerate_new(udev);

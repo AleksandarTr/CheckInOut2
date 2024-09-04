@@ -27,6 +27,9 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         wndProcMethod = WndProc;
         _originalWndProc = SetWindowLongPtr(_hwnd, GWL_WNDPROC, wndProcMethod);
         RegisterRawInput();
+        List<Device> devices = getDeviceList();
+        if(devices.Exists(device => device.hardwareID == ulong.Parse(Settings.get("hardwareID")!)))
+            raiseError("Izabrani uređaj nije povezan na računar.");
     }
 
     [DllImport("user32.dll")]
@@ -62,9 +65,7 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         rid[0].TargetWindow = _hwnd; // The handle of the target window
 
         if (!RegisterRawInputDevices(rid, (uint)rid.Length, (uint)Marshal.SizeOf(rid[0])))
-        {
-            throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
-        }
+            raiseError(new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error()).Message);
     }
 
     [StructLayout(LayoutKind.Sequential)]

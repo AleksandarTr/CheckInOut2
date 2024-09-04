@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using Avalonia.Threading;
+using CheckInOut2.Views;
 
 namespace CheckInOut2.Models;
 
@@ -26,6 +29,13 @@ public abstract class PlatformHardwareReader {
     }
 
     public abstract List<Device> getDeviceList();
+
+    protected void raiseError(string error) {
+        Dispatcher.UIThread.InvokeAsync(new Action(() =>
+            MainWindow.addMessage($"Greška kod čitača:{error}"
+        )));
+        Logger.log("Chip reader error:" + error);
+    }
 
     public PlatformHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter, ulong hardwareID) {
         this.buffer = buffer;

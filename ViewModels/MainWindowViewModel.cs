@@ -13,7 +13,7 @@ public partial class MainWindowViewModel : ObservableObject
     private DatabaseInterface db;
     static private bool adminPanelOpen = false;
     static private bool showActiveEmplyeesOpen = false;
-
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
     static public void adminPanelClosed() {
         adminPanelOpen = false;
     }

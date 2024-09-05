@@ -13,10 +13,10 @@
 
     <Border BorderThickness="1 0 1 1" BorderBrush="Gray">
         <StackPanel>
-            <TextBox Text="{Binding username}" FontSize="20" Watermark="Korisničko ime" Width="300" Margin="10 5 10 5"/>
-            <TextBox Text="{Binding password}" FontSize="20" Watermark="Šifra" PasswordChar="*" Width="300" Margin="10 5 10 5"/>
-            <TextBlock Name="chip" FontSize="20" Text="{Binding chip}" Margin="10 5 10 5"/>
-            <Button FontSize="20" HorizontalAlignment="Center" Content="Ulogujte se" Margin="10 5 10 5" Command="{Binding logIn}" CommandParameter="{Binding $parent[Window]}"/>
+            <TextBox Text="{Binding username}" FontSize="{Binding fontSize}" Watermark="Korisničko ime" Width="300" Margin="10 5 10 5"/>
+            <TextBox Text="{Binding password}" FontSize="{Binding fontSize}" Watermark="Šifra" PasswordChar="*" Width="300" Margin="10 5 10 5"/>
+            <TextBlock Name="chip" FontSize="{Binding fontSize}" Text="{Binding chip}" Margin="10 5 10 5"/>
+            <Button FontSize="{Binding fontSize}" HorizontalAlignment="Center" Content="Ulogujte se" Margin="10 5 10 5" Command="{Binding logIn}" CommandParameter="{Binding $parent[Window]}"/>
         </StackPanel>
     </Border>
 

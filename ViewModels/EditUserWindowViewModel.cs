@@ -86,6 +86,9 @@ class EditUserWindowViewModel : INotifyPropertyChanged {
             _settings = value;
             OnPropertyChanged();
         }}
+
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
+    
     private ObservableCollection<string> _users;
     public ObservableCollection<string> users {
         get { return _users; }

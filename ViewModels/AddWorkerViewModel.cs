@@ -8,6 +8,7 @@ class AddWorkerWindowViewModel {
     public string firstName {get;set;} = "";
     public string lastName {get;set;} = "";
     public string chip {get;set;} = "Čip: ";
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
 
     private DatabaseInterface db;
 

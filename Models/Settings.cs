@@ -14,6 +14,7 @@ public static class Settings {
 
     private static void loadDefaultSettings() {
         settings.Add("readerID", "0");
+        settings.Add("fontSize", "16");
     }
 
     static Settings() {

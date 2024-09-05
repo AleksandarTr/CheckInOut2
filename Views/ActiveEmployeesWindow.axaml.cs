@@ -13,6 +13,7 @@ partial class ActiveEmployeesWindow : Window {
         TextBlock employeeBlock = new TextBlock() {
             Text = $"{name} je na poslu.",
             Margin = new Avalonia.Thickness(5),
+            FontSize = int.Parse(Settings.get("fontSize")!)
         };
         StackPanel? activeEmployeesList = this.FindControl<StackPanel>("ActiveEmployeesList");
         activeEmployeesList?.Children.Add(employeeBlock);

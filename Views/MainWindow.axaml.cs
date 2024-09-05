@@ -1,7 +1,8 @@
 using System;
-using System.Collections.Generic;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using CheckInOut2.Models;
 using CheckInOut2.ViewModels;
 
@@ -16,7 +17,16 @@ public partial class MainWindow : Window
         Logger.log("Added message:" + message);
         StackPanel? infoBoard = instance.FindControl<StackPanel>("informationBoard");
         if(infoBoard == null) return false;
-        infoBoard.Children.Add(new TextBlock{Text = message});
+        Border border = new Border() {
+            BorderBrush = SolidColorBrush.Parse("Gray"),
+            BorderThickness = Thickness.Parse("0 0 0 1"),
+            Child = new TextBlock{
+                Text = message,
+                FontSize = int.Parse(Settings.get("fontSize")!),
+                Margin = Thickness.Parse("10 5 0 5")
+            }
+        };
+        infoBoard.Children.Add(border);
         return true;
     }
 

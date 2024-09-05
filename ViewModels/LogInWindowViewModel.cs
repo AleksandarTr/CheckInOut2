@@ -16,6 +16,7 @@ class LogInWindowViewModel {
     public string chip {get; set;} = "Čip: ";
 
     public static int MAX_PERMISSION = 511;
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
 
     private DatabaseInterface db;
 

@@ -14,6 +14,7 @@ class ExportWindowViewModel {
     public string day { get; set; } = DateTime.Now.Day.ToString("00");
     public string month { get; set; } = DateTime.Now.Month.ToString("00");
     public string year { get; set; } = DateTime.Now.Year.ToString("0000");
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
     private DatabaseInterface db;
 
     private ObservableCollection<String> _formats;

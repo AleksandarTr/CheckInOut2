@@ -72,6 +72,8 @@ class EditCheckWindowViewModel : INotifyPropertyChanged {
         }
     }
 
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
+
     private DatabaseInterface db;
     private List<Check> checkInfo = new List<Check>();
 

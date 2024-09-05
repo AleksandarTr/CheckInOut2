@@ -61,6 +61,7 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
         }}
     private DatabaseInterface db;
     private List<Worker> workers;
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

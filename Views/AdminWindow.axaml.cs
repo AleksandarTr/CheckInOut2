@@ -59,6 +59,7 @@ partial class AdminWindow : Window {
 
     public AdminWindow(int permission, DatabaseInterface db) {
         AvaloniaXamlLoader.Load(this);
+        DataContext = new CommonViewModel();
         this.db = db;
 
         if((permission & 1) == 0) this.FindControl<Button>("addWorker")!.IsEnabled = false;

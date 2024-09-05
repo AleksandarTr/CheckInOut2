@@ -13,6 +13,7 @@ class WorkerCheckWindowViewModel
     public string year { get; set; } = DateTime.Now.Year.ToString();
     public string hour { get; set; } = DateTime.Now.Hour.ToString("00");
     public string minute { get; set; } = DateTime.Now.Minute.ToString("00");
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
 
     private ObservableCollection<String> _names;
     public ObservableCollection<String> names { 

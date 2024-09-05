@@ -13,8 +13,23 @@ class SettingsWindowViewModel {
         private set { _readers = value; }
     }
     public int reader {get; set;} = -1;
+    public string fontSize {get; set; } = Settings.get("fontSize")!;
 
     public void saveSettings() {
+        if(!int.TryParse(fontSize, out _)) {
+            MessageBoxManager.GetMessageBoxStandard("Greška", "Nepravilna vrednost za veličinu fonta.", 
+                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            return;
+        }
+        if(reader < 0 || reader >= readers.Count) {
+            MessageBoxManager.GetMessageBoxStandard("Greška", "Nepravilna vrednost za čitač.", 
+                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            return;
+        }
+
+        if(Settings.get("fontSize") != fontSize) Logger.log($"fontSize changed from {Settings.get("fontSize")} to {fontSize}");
+        Settings.set("fontSize", fontSize);
+
         string newReaderID = devices[reader].hardwareID.ToString();
         if(Settings.get("readerID") != newReaderID) Logger.log($"readerID changed from {Settings.get("readerID")} to {newReaderID}");
         Settings.set("readerID", devices[reader].hardwareID.ToString());

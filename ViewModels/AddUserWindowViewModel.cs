@@ -18,6 +18,7 @@ class AddUserWindowViewModel{
     public bool close { get; set; } = false;
     public bool settings { get; set; } = false;
     private DatabaseInterface db;
+    public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
 
     public void onAddUser() {
         int permission = addWorker ? 1 : 0;

@@ -13,17 +13,17 @@
         
     <Border BorderThickness="1 0 1 1" BorderBrush="Gray">
         <StackPanel>
-            <ComboBox SelectedIndex="{Binding worker}" ItemsSource="{Binding names}" FontSize="20" Width="300" Margin="10 5 10 5"/>
+            <ComboBox SelectedIndex="{Binding worker}" ItemsSource="{Binding names}" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding day}" Watermark="Dan" FontSize="20" Width="50" Margin="10 5 10 5"/>
-                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding month}" Watermark="Mes" FontSize="20" Width="50" Margin="10 5 10 5"/>
-                <TextBox HorizontalContentAlignment="Center" MaxLength="4" Text="{Binding year}" Watermark="God" FontSize="20" Width="100" Margin="10 5 10 5"/>
+                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding day}" Watermark="Dan" FontSize="{Binding fontSize}" Width="50" Margin="10 5 10 5"/>
+                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding month}" Watermark="Mes" FontSize="{Binding fontSize}" Width="50" Margin="10 5 10 5"/>
+                <TextBox HorizontalContentAlignment="Center" MaxLength="4" Text="{Binding year}" Watermark="God" FontSize="{Binding fontSize}" Width="100" Margin="10 5 10 5"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding hour}" Watermark="Sat" FontSize="20" Width="50" Margin="10 5 10 5"/>
-                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding minute}" Watermark="Min" FontSize="20" Width="50" Margin="10 5 10 5"/>
+                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding hour}" Watermark="Sat" FontSize="{Binding fontSize}" Width="50" Margin="10 5 10 5"/>
+                <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding minute}" Watermark="Min" FontSize="{Binding fontSize}" Width="50" Margin="10 5 10 5"/>
             </StackPanel>
-            <Button Content="Čekiraj" HorizontalAlignment="Center" FontSize="20" Margin="10 5 10 5" Command="{Binding checkWorker}"/>
+            <Button Content="Čekiraj" HorizontalAlignment="Center" FontSize="{Binding fontSize}" Margin="10 5 10 5" Command="{Binding checkWorker}"/>
         </StackPanel>
     </Border>
 </Window>

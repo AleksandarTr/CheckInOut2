@@ -16,6 +16,12 @@
             <TextBox Text="{Binding firstName}" Watermark="Ime" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
             <TextBox Text="{Binding lastName}" Watermark="Prezime" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
             <TextBlock Name="chip" Text="{Binding chip}" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <TextBox Text="{Binding hourlyRate}" Watermark="Satnica" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <TextBlock Text="Radno vreme" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <StackPanel Orientation="Horizontal">
+                <ComboBox Grid.Column="0" Grid.Row="0" Width="250" SelectedIndex="{Binding timeConfig}" ItemsSource="{Binding timeConfigs}" FontSize="{Binding fontSize}" Margin="10 5 10 5"/>
+                <Button Grid.Column="1" Grid.Row="0" Content="+" HorizontalAlignment="Right" Width="30" FontSize="{Binding fontSize}" Margin="10 5 10 5" Command="{Binding addTimeConfig}" CommandParameter="{Binding $parent[Window]}"/>
+            </StackPanel>
             <Button Content="Dodaj" HorizontalAlignment="Center" FontSize="{Binding fontSize}" Margin="10 5 10 5" Command="{Binding addWorker}"/>
         </StackPanel>
     </Border>

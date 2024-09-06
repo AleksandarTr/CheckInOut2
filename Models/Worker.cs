@@ -5,12 +5,14 @@ public class Worker {
     public string firstName = "";
     public string lastName = "";
     public string chip = "";
+    public float hourlyRate = 0;
+    public int timeConfig = 0;
 
     public override bool Equals(object? obj)
     {
         if(obj is not Worker || obj is null) return false;
         Worker worker = (obj as Worker)!;
-        return id == worker.id && firstName == worker.firstName && lastName == worker.lastName && chip == worker.chip;
+        return id == worker.id;
     }
 
     public override int GetHashCode() {

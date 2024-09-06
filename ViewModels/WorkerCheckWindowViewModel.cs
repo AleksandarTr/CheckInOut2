@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CheckInOut2.Models;
+using CheckInOut2.Views;
 using MsBox.Avalonia;
 
 namespace CheckInOut2.ViewModels;
@@ -38,9 +39,9 @@ class WorkerCheckWindowViewModel
         }
         else {
             Logger.log($"Manuel check attempt: {workers[worker].firstName} {workers[worker].lastName} at {year}.{month}.{day}-{hour}:{minute}");
-            MessageBoxManager.GetMessageBoxStandard("Čekiranje",
-                db.logCheckIn(workers[worker].chip, new DateTime(int.Parse(year), int.Parse(month), int.Parse(day), int.Parse(hour), int.Parse(minute), 0)),
-                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            string message = db.logCheckIn(workers[worker].chip, new DateTime(int.Parse(year), int.Parse(month), int.Parse(day), int.Parse(hour), int.Parse(minute), 0));
+            MessageBoxManager.GetMessageBoxStandard("Čekiranje", message, MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            MainWindow.addMessage(message);
         }
     }
 

@@ -51,7 +51,7 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
     public ObservableCollection<String> names { 
         get { return _names; }
         private set { _names = value; }
-     }
+    }
 
     private int _worker = -1;
     public int worker {get {return _worker;}
@@ -62,6 +62,9 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
     private DatabaseInterface db;
     private List<Worker> workers;
     public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
+    public string hourlyRate {get;set;} = "";
+    public int timeConfig {get; set;} = -1;
+    public ObservableCollection<string> timeConfigs {get; private set;} = new ObservableCollection<string>();
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -80,7 +83,8 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
     public void saveWorker() {
         string[] chipParts = chip.Split(' ');
         string error = "Nijedno polje ne može da bude prazno!";
-        if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !db.editWorker(workers[worker].id, firstName, lastName, chipParts[1], ref error)) {
+        if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !float.TryParse(hourlyRate, out float hourlyRateVal)
+            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.editWorker(workers[worker].id, firstName, lastName, chipParts[1], hourlyRateVal, timeConfig, ref error)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", error, 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             Logger.log($"Failed saving({firstName},{lastName},{chip}): {error}");

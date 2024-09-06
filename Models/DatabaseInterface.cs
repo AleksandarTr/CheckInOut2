@@ -16,7 +16,9 @@ public class DatabaseInterface {
         id Integer PRIMARY KEY AUTOINCREMENT,
         firstName Text NOT NULL,
         lastName Text NOT NULL,
-        chip Text NOT NULL)";
+        chip Text NOT NULL,
+        hourlyRate Real NOT NULL,
+        timeConfig Integer NOT NULL)";
 
     private const string logsCreate = @"
         Create Table Logs(
@@ -30,6 +32,14 @@ public class DatabaseInterface {
         password Text NOT NULL,
         chip Text NOT NULL,
         permission Integer NOT NULL)";
+
+    private const string timeConfigCreate = @"
+        Create Table TimeConfig(
+        id Integer NOT NULL,
+        day Integer NOT NULL,
+        start Text NOT NULL,
+        end Text NOT NULL,
+        PRIMARY KEY(id, day))";
 
     private void createDatabase() {
         String createConnectionString = new SqliteConnectionStringBuilder(connection.ConnectionString){
@@ -51,6 +61,10 @@ public class DatabaseInterface {
         createUsersTable.CommandText = usersCreate;
         createUsersTable.ExecuteNonQuery();
 
+        SqliteCommand createTimeConfigTable = connection.CreateCommand();
+        createUsersTable.CommandText = timeConfigCreate;
+        createUsersTable.ExecuteNonQuery();
+
         SqliteCommand addAdmin = connection.CreateCommand();
         string defaultPassword = LogInWindowViewModel.ComputeSha256Hash("password");
         addAdmin.CommandText = "Insert into Users values ('admin', $password, '', 0)";
@@ -59,9 +73,26 @@ public class DatabaseInterface {
     }
 
     private void updateDatabase() {
-        SqliteCommand addPermissionColumn = connection.CreateCommand();
-        addPermissionColumn.CommandText = "Alter table Users add column permission Integer NOT NULL DEFAULT (0)";
-        addPermissionColumn.ExecuteNonQuery();
+        try {
+            SqliteCommand addPermissionColumn = connection.CreateCommand();
+            addPermissionColumn.CommandText = "Alter table Users add column permission Integer NOT NULL DEFAULT (0)";
+            addPermissionColumn.ExecuteNonQuery();
+        }
+        catch(SqliteException) {}
+
+        try {
+            SqliteCommand addHourlyRateColumn = connection.CreateCommand();
+            addHourlyRateColumn.CommandText = "Alter table Employees add column hourlyRate Real NOT NULL DEFAULT (0)";
+            addHourlyRateColumn.ExecuteNonQuery();
+        }
+        catch(SqliteException) {}
+
+        try {
+            SqliteCommand addTimeConfigColumn = connection.CreateCommand();
+            addTimeConfigColumn.CommandText = "Alter table Employees add column timeConfig Integer NOT NULL DEFAULT (0)";
+            addTimeConfigColumn.ExecuteNonQuery();
+        }
+        catch(SqliteException) {}
     }
 
     private bool checkDatabase() {
@@ -73,7 +104,8 @@ public class DatabaseInterface {
         {
             { "Employees", false },
             { "Logs", false },
-            { "Users", false }
+            { "Users", false },
+            { "TimeConfig", false }
         };
 
         while (checker.Read()) {
@@ -96,6 +128,9 @@ public class DatabaseInterface {
                     case "Users":
                         tableCreationCommand.CommandText = usersCreate;
                         break;
+                    case "TimeConfig":
+                        tableCreationCommand.CommandText = timeConfigCreate;
+                        break;
                 }
                 tableCreationCommand.ExecuteNonQuery();
                 result = false;
@@ -104,6 +139,11 @@ public class DatabaseInterface {
         SqliteCommand checkUserTable = connection.CreateCommand();
         checkUserTable.CommandText = "Select username, password, chip, permission from Users";
         try { checkUserTable.ExecuteNonQuery(); }
+        catch (SqliteException){ updateDatabase(); }
+
+        SqliteCommand checkEmplyeesTable = connection.CreateCommand();
+        checkEmplyeesTable.CommandText = "Select id, firstName, lastName, chip, hourlyRate, timeConfig from Employees";
+        try { checkEmplyeesTable.ExecuteNonQuery(); }
         catch (SqliteException){ updateDatabase(); }
 
         return result;
@@ -198,7 +238,7 @@ public class DatabaseInterface {
         return 0;
     }
 
-    public bool addWorker(string firstName, string lastName, string chip, ref string error) {
+    public bool addWorker(string firstName, string lastName, string chip, float hourlyRate, int timeConfig, ref string error) {
         SqliteCommand checkNameMatchCommand = connection.CreateCommand();
         checkNameMatchCommand.CommandText = "Select id from Employees where firstName = $firstName and lastName = $lastName";
         checkNameMatchCommand.Parameters.AddWithValue("firstName", firstName);
@@ -218,10 +258,13 @@ public class DatabaseInterface {
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Warning).ShowAsync();
 
         SqliteCommand addCommand = connection.CreateCommand();
-        addCommand.CommandText = "Insert into Employees (firstName, lastName, chip) values ($firstName, $lastName, $chip)";
+        addCommand.CommandText = @"Insert into Employees (firstName, lastName, chip, hourlyRate, timeConfig) 
+            values ($firstName, $lastName, $chip, $hourlyRate, $timeConfig)";
         addCommand.Parameters.AddWithValue("firstName", firstName);
         addCommand.Parameters.AddWithValue("lastName", lastName);
         addCommand.Parameters.AddWithValue("chip", chip);
+        addCommand.Parameters.AddWithValue("hourlyRate", hourlyRate);
+        addCommand.Parameters.AddWithValue("timeConfig", timeConfig);
         if(addCommand.ExecuteNonQuery() == 0) {
             error = "Nije mogao da bude dodat radnik.";
             return false;
@@ -229,7 +272,7 @@ public class DatabaseInterface {
         return true;
     }
     
-    public bool editWorker(int id, string firstName, string lastName, string chip, ref string error) {
+    public bool editWorker(int id, string firstName, string lastName, string chip, float hourlyRate, int timeConfig, ref string error) {
         SqliteCommand checkNameMatchCommand = connection.CreateCommand();
         checkNameMatchCommand.CommandText = "Select id from Employees where firstName = $firstName and lastName = $lastName";
         checkNameMatchCommand.Parameters.AddWithValue("firstName", firstName);
@@ -251,10 +294,13 @@ public class DatabaseInterface {
         }
 
         SqliteCommand workerUpdateCommand = connection.CreateCommand();
-        workerUpdateCommand.CommandText = "Update Employees set firstName = $firstName, lastName = $lastName, chip = $chip where id = $id";
+        workerUpdateCommand.CommandText = @"Update Employees set firstName = $firstName, lastName = $lastName, chip = $chip, 
+            hourlyRate = $hourlyRate, timeConfig = $timeConfig where id = $id";
         workerUpdateCommand.Parameters.AddWithValue("firstName", firstName);
         workerUpdateCommand.Parameters.AddWithValue("lastName", lastName);
         workerUpdateCommand.Parameters.AddWithValue("chip", chip);
+        workerUpdateCommand.Parameters.AddWithValue("hourlyRate", hourlyRate);
+        workerUpdateCommand.Parameters.AddWithValue("timeConfig", timeConfig);
         workerUpdateCommand.Parameters.AddWithValue("id", id);
         if(workerUpdateCommand.ExecuteNonQuery() == 0) {
             error = $"Nije pronađen radnik s id-om {id}";
@@ -268,14 +314,16 @@ public class DatabaseInterface {
         List<Worker> workers = new List<Worker>();
 
         SqliteCommand workerFetcherCommand = connection.CreateCommand();
-        workerFetcherCommand.CommandText = "Select id, firstName, lastName, chip from Employees";
+        workerFetcherCommand.CommandText = "Select id, firstName, lastName, chip, hourlyRate, timeConfig from Employees";
         SqliteDataReader workerFetcher = workerFetcherCommand.ExecuteReader();
         while(workerFetcher.Read()) 
             workers.Add(new Worker() {
                 id = workerFetcher.GetInt32(0),
                 firstName = workerFetcher.GetString(1),
                 lastName = workerFetcher.GetString(2),
-                chip = workerFetcher.GetString(3)
+                chip = workerFetcher.GetString(3),
+                hourlyRate = workerFetcher.GetFloat(4),
+                timeConfig = workerFetcher.GetInt32(5)
             });
 
         return workers;
@@ -389,6 +437,27 @@ public class DatabaseInterface {
             return false;
         }
         return true;
+    }
+
+    public List<TimeConfig> GetTimeConfigs() {
+        SqliteCommand timeConfigFetcher = connection.CreateCommand();
+        timeConfigFetcher.CommandText = @"Select id, day, start, end from TimeConfig order by id ASC, day ASC";
+        SqliteDataReader fetcher = timeConfigFetcher.ExecuteReader();
+
+        List<TimeConfig> timeConfigs = new List<TimeConfig>();
+        while(fetcher.Read()) {
+            string[] start = fetcher.GetString(2).Split(':');
+            string[] end = fetcher.GetString(3).Split(':');
+            timeConfigs.Add(new TimeConfig() {
+                id = fetcher.GetInt32(0),
+                day = fetcher.GetInt32(1),
+                HourStart = start[0],
+                MinuteStart = start[1],
+                HourEnd = end[0],
+                MinuteEnd = end[1]
+            });
+        }
+        return timeConfigs;
     }
 
     ~DatabaseInterface() {

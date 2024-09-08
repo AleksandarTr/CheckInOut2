@@ -17,13 +17,15 @@ partial class AddWorkerWindowViewModel : ObservableObject {
     public string hourlyRate {get;set;} = "";
     public int timeConfig {get; set;} = -1;
     public ObservableCollection<string> timeConfigs {get; set;} = new ObservableCollection<string>();
+    private List<int> timeConfigIDs;
     private DatabaseInterface db;
 
     public void addWorker() {
         string[] chipParts = chip.Split(' ');
         string error = "Nijedno polje ne može da bude prazno!";
+
         if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !float.TryParse(hourlyRate, out float hourlyRateVal)
-            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.addWorker(firstName, lastName, chipParts[1], hourlyRateVal, timeConfig, ref error)) {
+            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.addWorker(firstName, lastName, chipParts[1], hourlyRateVal, timeConfigIDs[timeConfig], ref error)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", error, 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             Logger.log($"Failed to add worker({firstName},{lastName},{chipParts[1]}):{error}");
@@ -37,7 +39,7 @@ partial class AddWorkerWindowViewModel : ObservableObject {
 
     private void updateTimeConfigs() {
         timeConfigs.Clear();
-        TimeConfig.ToStrings(db.GetTimeConfigs(), out _).ForEach(timeConfigs.Add);
+        TimeConfig.ToStrings(db.GetTimeConfigs(), out timeConfigIDs).ForEach(timeConfigs.Add);
     }
 
     public void addTimeConfig(AddWorkerWindow view) {

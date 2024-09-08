@@ -63,8 +63,21 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
     private DatabaseInterface db;
     private List<Worker> workers;
     public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
-    public string hourlyRate {get;set;} = "";
-    public int timeConfig {get; set;} = -1;
+    private string _hourlyRate = "";
+    public string hourlyRate {
+        get => _hourlyRate; 
+        set {
+            _hourlyRate = value;
+            OnPropertyChanged();
+            }}
+    private int _timeConfig = -1;
+    public int timeConfig {
+        get => _timeConfig; 
+        set {
+            _timeConfig = value;
+            OnPropertyChanged();
+            }}    
+    private List<int> timeConfigIDs;
     public ObservableCollection<string> timeConfigs {get; private set;} = new ObservableCollection<string>();
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -78,6 +91,8 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
         firstName = workers[worker].firstName;
         lastName = workers[worker].lastName;
         chip = "Čip: " + workers[worker].chip;
+        hourlyRate = workers[worker].hourlyRate.ToString();
+        timeConfig = timeConfigIDs.FindIndex(time => time == workers[worker].timeConfig);
         Logger.log($"Worker selected: {names[worker]}");
     }
 
@@ -85,7 +100,7 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
         string[] chipParts = chip.Split(' ');
         string error = "Nijedno polje ne može da bude prazno!";
         if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !float.TryParse(hourlyRate, out float hourlyRateVal)
-            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.editWorker(workers[worker].id, firstName, lastName, chipParts[1], hourlyRateVal, timeConfig, ref error)) {
+            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.editWorker(workers[worker].id, firstName, lastName, chipParts[1], hourlyRateVal, timeConfigIDs[timeConfig], ref error)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", error, 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             Logger.log($"Failed saving({firstName},{lastName},{chip}): {error}");
@@ -98,15 +113,16 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
             workers[index].firstName = firstName;
             workers[index].lastName = lastName;
             workers[index].chip = chipParts[1];
+            workers[index].hourlyRate = hourlyRateVal;
+            workers[index].timeConfig = timeConfigIDs[timeConfig];
             _names[index] = firstName + " " + lastName;
             worker = index;
-
         }
     }
 
     private void updateTimeConfigs() {
         timeConfigs.Clear();
-        TimeConfig.ToStrings(db.GetTimeConfigs(), out _).ForEach(timeConfigs.Add);
+        TimeConfig.ToStrings(db.GetTimeConfigs(), out timeConfigIDs).ForEach(timeConfigs.Add);
     }
 
     public void addTimeConfig(EditWorkerWindow view) {

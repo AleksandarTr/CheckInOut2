@@ -37,11 +37,11 @@ partial class AddWorkerWindowViewModel : ObservableObject {
 
     private void updateTimeConfigs() {
         timeConfigs.Clear();
-        TimeConfig.ToStrings(db.GetTimeConfigs()).ForEach(timeConfigs.Add);
+        TimeConfig.ToStrings(db.GetTimeConfigs(), out _).ForEach(timeConfigs.Add);
     }
 
     public void addTimeConfig(AddWorkerWindow view) {
-        AddTimeConfigWindow addTimeConfigWindow= new AddTimeConfigWindow(updateTimeConfigs);
+        AddTimeConfigWindow addTimeConfigWindow = new AddTimeConfigWindow(updateTimeConfigs, db);
         addTimeConfigWindow.Show(view);
     }
 

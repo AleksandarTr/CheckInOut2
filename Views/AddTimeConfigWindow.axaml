@@ -13,6 +13,7 @@
         
     <Border BorderThickness="1 0 1 1" BorderBrush="Gray">
         <StackPanel>
+            <ComboBox SelectedIndex="{Binding TimeConfig}" ItemsSource="{Binding timeConfigs}" FontSize="{Binding FontSize}" Width="300" Margin="10 5 10 5"/>
             <TextBlock Text="Ponedeljak" FontSize="{Binding FontSize}" Width="300" Margin="10 5 10 5"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding Monday.HourStart}" Watermark="Sat" FontSize="{Binding FontSize}" Width="50" Margin="10 5 10 5"/>
@@ -62,7 +63,7 @@
                 <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding Sunday.HourEnd}" Watermark="Sat" FontSize="{Binding FontSize}" Width="50" Margin="10 5 10 5"/>
                 <TextBox HorizontalContentAlignment="Center" MaxLength="2" Text="{Binding Sunday.MinuteEnd}" Watermark="Min" FontSize="{Binding FontSize}" Width="50" Margin="10 5 10 5"/>
             </StackPanel>
-            <Button Content="Dodaj" HorizontalAlignment="Center" FontSize="{Binding FontSize}" Margin="10 5 10 5"/>
+            <Button Content="{Binding ActionText}" HorizontalAlignment="Center" FontSize="{Binding FontSize}" Margin="10 5 10 5" Command="{Binding actionClick}"/>
         </StackPanel>
     </Border>
 </Window>

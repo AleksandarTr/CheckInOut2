@@ -5,6 +5,7 @@ using CheckInOut2.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using MsBox.Avalonia;
+using CheckInOut2.Views;
 
 namespace CheckInOut2.ViewModels;
 
@@ -103,8 +104,19 @@ class EditWorkerWindowViewModel : INotifyPropertyChanged {
         }
     }
 
+    private void updateTimeConfigs() {
+        timeConfigs.Clear();
+        TimeConfig.ToStrings(db.GetTimeConfigs(), out _).ForEach(timeConfigs.Add);
+    }
+
+    public void addTimeConfig(EditWorkerWindow view) {
+        AddTimeConfigWindow addTimeConfigWindow = new AddTimeConfigWindow(updateTimeConfigs, db);
+        addTimeConfigWindow.Show(view);
+    }
+
     public EditWorkerWindowViewModel(DatabaseInterface db) {
         this.db = db;
+        updateTimeConfigs();
         _names = new ObservableCollection<string>();
         workers = db.getWorkers();
         workers.ForEach(worker => names.Add(worker.firstName + " " + worker.lastName));

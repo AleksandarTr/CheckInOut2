@@ -62,8 +62,8 @@ public class DatabaseInterface {
         createUsersTable.ExecuteNonQuery();
 
         SqliteCommand createTimeConfigTable = connection.CreateCommand();
-        createUsersTable.CommandText = timeConfigCreate;
-        createUsersTable.ExecuteNonQuery();
+        createTimeConfigTable.CommandText = timeConfigCreate;
+        createTimeConfigTable.ExecuteNonQuery();
 
         SqliteCommand addAdmin = connection.CreateCommand();
         string defaultPassword = LogInWindowViewModel.ComputeSha256Hash("password");
@@ -458,6 +458,65 @@ public class DatabaseInterface {
             });
         }
         return timeConfigs;
+    }
+
+    public TimeConfig? GetTimeConfig(int id, int day) {
+        SqliteCommand timeConfigFetcher = connection.CreateCommand();
+        timeConfigFetcher.CommandText = "Select start, end from TimeConfig where id = $id and day = $day";
+        timeConfigFetcher.Parameters.AddWithValue("id", id);
+        timeConfigFetcher.Parameters.AddWithValue("day", day);
+
+        SqliteDataReader fetcher = timeConfigFetcher.ExecuteReader();
+        if(fetcher.Read()) {
+            string[] start = fetcher.GetString(0).Split(':');
+            string[] end = fetcher.GetString(1).Split(':');
+            return new TimeConfig() {
+                id = id,
+                day = day,
+                HourStart = start[0],
+                MinuteStart = start[1],
+                HourEnd = end[0],
+                MinuteEnd = end[1]
+            };
+        }
+
+        return null;
+    }
+
+    public int getNextTimeConfigID() {
+        SqliteCommand timeConfigIDFetcher = connection.CreateCommand();
+        timeConfigIDFetcher.CommandText = "Select max(id) from TimeConfig";
+        SqliteDataReader fetcher = timeConfigIDFetcher.ExecuteReader();
+        if(fetcher.Read()) return fetcher.GetInt32(0) + 1;
+        return 0;
+    }
+
+    public void addTimeConfig(TimeConfig timeConfig) {
+        SqliteCommand timeConfigAdder = connection.CreateCommand();
+        timeConfigAdder.CommandText = "Insert into TimeConfig (id, day, start, end) values ($id, $day, $start, $end)";
+        timeConfigAdder.Parameters.AddWithValue("id", timeConfig.id);
+        timeConfigAdder.Parameters.AddWithValue("day", timeConfig.day);
+        timeConfigAdder.Parameters.AddWithValue("start", $"{int.Parse(timeConfig.HourStart):00}:{int.Parse(timeConfig.MinuteStart):00}");
+        timeConfigAdder.Parameters.AddWithValue("end", $"{int.Parse(timeConfig.HourEnd):00}:{int.Parse(timeConfig.MinuteEnd):00}");
+        timeConfigAdder.ExecuteNonQuery();
+    }
+
+    public void editTimeConfig(TimeConfig timeConfig) {
+        SqliteCommand timeConfigEditor = connection.CreateCommand();
+        timeConfigEditor.CommandText = "Update TimeConfig set start = $start, end = $end where id = $id and day = $day";
+        timeConfigEditor.Parameters.AddWithValue("id", timeConfig.id);
+        timeConfigEditor.Parameters.AddWithValue("day", timeConfig.day);
+        timeConfigEditor.Parameters.AddWithValue("start", $"{int.Parse(timeConfig.HourStart):00}:{int.Parse(timeConfig.MinuteStart):00}");
+        timeConfigEditor.Parameters.AddWithValue("end", $"{int.Parse(timeConfig.HourEnd):00}:{int.Parse(timeConfig.MinuteEnd):00}");
+        timeConfigEditor.ExecuteNonQuery();
+    }
+
+    public void deleteTimeConfig(TimeConfig timeConfig) {
+        SqliteCommand timeConfigRemover = connection.CreateCommand();
+        timeConfigRemover.CommandText = "Delete from TimeConfig where id = $id and day = $day";
+        timeConfigRemover.Parameters.AddWithValue("id", timeConfig.id);
+        timeConfigRemover.Parameters.AddWithValue("day", timeConfig.day);
+        timeConfigRemover.ExecuteNonQuery();
     }
 
     ~DatabaseInterface() {

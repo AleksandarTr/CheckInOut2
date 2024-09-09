@@ -14,6 +14,7 @@ class SettingsWindowViewModel {
     }
     public int reader {get; set;} = -1;
     public string fontSize {get; set; } = Settings.get("fontSize")!;
+    public string tolerance {get; set; } = Settings.get("tolerance")!;
 
     public void saveSettings() {
         if(!int.TryParse(fontSize, out _)) {
@@ -21,6 +22,13 @@ class SettingsWindowViewModel {
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
             return;
         }
+
+        if(!int.TryParse(tolerance, out _)) {
+            MessageBoxManager.GetMessageBoxStandard("Greška", "Nepravilna vrednost za toleranciju kašnjenja.", 
+                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            return;
+        }
+
         if(reader < 0 || reader >= readers.Count) {
             MessageBoxManager.GetMessageBoxStandard("Greška", "Nepravilna vrednost za čitač.", 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
@@ -29,6 +37,9 @@ class SettingsWindowViewModel {
 
         if(Settings.get("fontSize") != fontSize) Logger.log($"fontSize changed from {Settings.get("fontSize")} to {fontSize}");
         Settings.set("fontSize", fontSize);
+
+        if(Settings.get("tolerance") != tolerance) Logger.log($"tolerance changed from {Settings.get("tolerance")} to {tolerance}");
+        Settings.set("tolerance", tolerance);
 
         string newReaderID = devices[reader].hardwareID.ToString();
         if(Settings.get("readerID") != newReaderID) Logger.log($"readerID changed from {Settings.get("readerID")} to {newReaderID}");

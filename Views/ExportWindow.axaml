@@ -19,7 +19,7 @@
                 <TextBox HorizontalContentAlignment="Center" MaxLength="4" Text="{Binding year}" Watermark="God" FontSize="{Binding fontSize}" Width="100" Margin="10 5 10 5"/>
             </StackPanel>
             <ComboBox SelectedIndex="{Binding format}" ItemsSource="{Binding formats}" Name="workerList" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <Button Content="Izvezi aktivnosti" HorizontalAlignment="Center" FontSize="{Binding fontSize}" Margin="10 5 10 5" Command="{Binding export}"/>
+            <Button Content="Izvezi aktivnosti" HorizontalAlignment="Center" FontSize="{Binding fontSize}" Margin="10 5 10 5" Command="{Binding exportClick}"/>
         </StackPanel>
     </Border>
 </Window>

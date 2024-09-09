@@ -15,6 +15,7 @@ public static class Settings {
     private static void loadDefaultSettings() {
         settings.Add("readerID", "0");
         settings.Add("fontSize", "16");
+        settings.Add("tolerance", "5");
     }
 
     static Settings() {
@@ -42,6 +43,11 @@ public static class Settings {
 
     public static string? get(string key) {
         if(settings.ContainsKey(key)) return settings[key];
+        return null;
+    }
+
+    public static int? getInt(string key) {
+        if(settings.ContainsKey(key) && int.TryParse(settings[key], out int result)) return result;
         return null;
     }
 }

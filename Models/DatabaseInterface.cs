@@ -485,7 +485,7 @@ public class DatabaseInterface {
 
     public int getNextTimeConfigID() {
         SqliteCommand timeConfigIDFetcher = connection.CreateCommand();
-        timeConfigIDFetcher.CommandText = "Select max(id) from TimeConfig";
+        timeConfigIDFetcher.CommandText = "Select COALESCE(max(id), -1) from TimeConfig";
         SqliteDataReader fetcher = timeConfigIDFetcher.ExecuteReader();
         if(fetcher.Read()) return fetcher.GetInt32(0) + 1;
         return 0;

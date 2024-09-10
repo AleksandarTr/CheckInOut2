@@ -43,6 +43,7 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
+        Logger.log("Main window opened");
         AvaloniaXamlLoader.Load(this);
         db = new DatabaseInterface("checkIO.db");
         MainWindowViewModel viewModel = new MainWindowViewModel(db);
@@ -51,6 +52,5 @@ public partial class MainWindow : Window
 
         ChipReader.focusWindow(this);
         ChipReader.addChipReaderEventHandler(onChipRead);
-        Logger.log("Main window opened");
     }
 }

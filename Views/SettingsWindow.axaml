@@ -17,7 +17,7 @@
             <ComboBox SelectedIndex="{Binding reader}" ItemsSource="{Binding readers}" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
             <TextBlock FontSize="{Binding fontSize}" Text="Veličina fonta" Margin="10 5 10 5"/>
             <TextBox FontSize="{Binding fontSize}" Text="{Binding fontSize}" Margin="10 5 10 5"/> 
-            <TextBlock FontSize="{Binding fontSize}" Text="Tolerancija kašnjenja" Margin="10 5 10 5"/>
+            <TextBlock FontSize="{Binding fontSize}" Text="Tolerancija kašnjenja(min)" Margin="10 5 10 5"/>
             <TextBox FontSize="{Binding fontSize}" Text="{Binding tolerance}" Margin="10 5 10 5"/> 
             <Button Content="Sačuvaj" HorizontalAlignment="Center" FontSize="{Binding fontSize}" Margin="10 5 10 5" Command="{Binding saveSettings}"/>
         </StackPanel>

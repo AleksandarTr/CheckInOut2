@@ -34,7 +34,7 @@ class ExportWindowViewModel {
     private void export(List<Check> checks, string fileName, string extension, WriteDate? writeDate, WriteUmatched? writeUnmatched, WriteMatched? writeMatched,
      Action<StreamWriter>? writeLogStart, Action<StreamWriter>? writeHoursStart, WriteHours? writeHours) {
         if(!Directory.Exists("izvestaji")) Directory.CreateDirectory("izvestaji");
-        StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}-log.{extension}");
+        StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}-dnevnik.{extension}");
 
         int tolerance = (int) Settings.getInt("tolerance")!;
         DateTime date = DateTime.MinValue;

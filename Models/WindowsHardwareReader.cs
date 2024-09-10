@@ -28,7 +28,7 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         _originalWndProc = SetWindowLongPtr(_hwnd, GWL_WNDPROC, wndProcMethod);
         RegisterRawInput();
         List<Device> devices = getDeviceList();
-        if(devices.Exists(device => device.hardwareID == ulong.Parse(Settings.get("hardwareID")!)))
+        if(!devices.Exists(device => device.hardwareID == ulong.Parse(Settings.get("readerID")!)))
             raiseError("Izabrani uređaj nije povezan na računar.");
     }
 

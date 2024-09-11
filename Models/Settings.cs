@@ -12,10 +12,22 @@ public static class Settings {
         writer.Close();
     }
 
-    private static void loadDefaultSettings() {
-        settings.Add("readerID", "0");
-        settings.Add("fontSize", "16");
-        settings.Add("tolerance", "5");
+    private static bool loadDefaultSettings() {
+        Dictionary<string, string> defaultSettings = new Dictionary<string, string>() {
+            {"readerID", "0"},
+            {"fontSize", "16"},
+            {"toleranceEarly", "10"},
+            {"toleranceLate", "5"}
+        };
+        bool changed = false;
+
+        foreach(var setting in defaultSettings)
+            if(!settings.ContainsKey(setting.Key)) {
+                settings.Add(setting.Key, setting.Value);
+                changed = true;
+            }
+
+        return changed;
     }
 
     static Settings() {
@@ -28,6 +40,7 @@ public static class Settings {
                 line = reader.ReadLine();
             }
             reader.Close();
+            if(loadDefaultSettings()) save();
         }
         catch(FileNotFoundException) {
             loadDefaultSettings();

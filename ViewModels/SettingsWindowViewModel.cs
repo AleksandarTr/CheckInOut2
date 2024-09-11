@@ -14,7 +14,8 @@ class SettingsWindowViewModel {
     }
     public int reader {get; set;} = -1;
     public string fontSize {get; set; } = Settings.get("fontSize")!;
-    public string tolerance {get; set; } = Settings.get("tolerance")!;
+    public string toleranceEarly {get; set; } = Settings.get("toleranceEarly")!;
+    public string toleranceLate {get; set; } = Settings.get("toleranceLate")!;
 
     public void saveSettings() {
         if(!int.TryParse(fontSize, out _)) {
@@ -23,7 +24,13 @@ class SettingsWindowViewModel {
             return;
         }
 
-        if(!int.TryParse(tolerance, out _)) {
+        if(!int.TryParse(toleranceEarly, out _)) {
+            MessageBoxManager.GetMessageBoxStandard("Greška", "Nepravilna vrednost za toleranciju poranjivanja.", 
+                MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
+            return;
+        }
+
+        if(!int.TryParse(toleranceLate, out _)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", "Nepravilna vrednost za toleranciju kašnjenja.", 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
             return;
@@ -38,8 +45,11 @@ class SettingsWindowViewModel {
         if(Settings.get("fontSize") != fontSize) Logger.log($"fontSize changed from {Settings.get("fontSize")} to {fontSize}");
         Settings.set("fontSize", fontSize);
 
-        if(Settings.get("tolerance") != tolerance) Logger.log($"tolerance changed from {Settings.get("tolerance")} to {tolerance}");
-        Settings.set("tolerance", tolerance);
+        if(Settings.get("toleranceEarly") != toleranceEarly) Logger.log($"toleranceEarly changed from {Settings.get("toleranceEarly")} to {toleranceEarly}");
+        Settings.set("toleranceEarly", toleranceEarly);
+
+        if(Settings.get("toleranceLate") != toleranceLate) Logger.log($"toleranceLate changed from {Settings.get("toleranceLate")} to {toleranceLate}");
+        Settings.set("toleranceLate", toleranceLate);
 
         string newReaderID = devices[reader].hardwareID.ToString();
         if(Settings.get("readerID") != newReaderID) Logger.log($"readerID changed from {Settings.get("readerID")} to {newReaderID}");

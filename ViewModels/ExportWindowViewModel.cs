@@ -36,7 +36,8 @@ class ExportWindowViewModel {
         if(!Directory.Exists("izvestaji")) Directory.CreateDirectory("izvestaji");
         StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}-dnevnik.{extension}");
 
-        int tolerance = (int) Settings.getInt("tolerance")!;
+        int toleranceEarly = (int) Settings.getInt("toleranceEarly")!;
+        int toleranceLate = (int) Settings.getInt("toleranceLate")!;
         DateTime date = DateTime.MinValue;
         List<Check> unmatched = new List<Check>();
         Dictionary<Worker, int> minutes = new Dictionary<Worker, int>();
@@ -59,7 +60,7 @@ class ExportWindowViewModel {
                     if(timeConfigs[worker][day] != null) {
                         int difference = (unmatchedCheck.time.Hour - int.Parse(timeConfigs[worker][day]!.HourStart)) * 60
                             + unmatchedCheck.time.Minute - int.Parse(timeConfigs[worker][day]!.MinuteStart);
-                        if(Math.Abs(difference) > tolerance) warning = true;
+                        if(-difference > toleranceEarly || difference > toleranceLate) warning = true;
                     }
 
                     writeUnmatched?.Invoke(log, worker.firstName + " " + worker.lastName, unmatchedCheck.time, warning);
@@ -82,12 +83,12 @@ class ExportWindowViewModel {
                 if(timeConfigs[worker][day] != null) {
                     int difference = (match.time.Hour - int.Parse(timeConfigs[worker][day]!.HourStart)) * 60
                         + match.time.Minute - int.Parse(timeConfigs[worker][day]!.MinuteStart);
-                    if(Math.Abs(difference) > tolerance) warning = true;
+                    if(-difference > toleranceEarly || difference > toleranceLate) warning = true;
                     else startTime = DateTime.ParseExact($"{timeConfigs[worker][day]!.HourStart}:{timeConfigs[worker][day]!.MinuteStart}", "HH:mm", CultureInfo.InvariantCulture);
                     
                     difference = (check.time.Hour - int.Parse(timeConfigs[worker][day]!.HourEnd)) * 60
                         + check.time.Minute - int.Parse(timeConfigs[worker][day]!.MinuteEnd);
-                    if(Math.Abs(difference) > tolerance) warning = true;
+                    if(difference > toleranceEarly || -difference > toleranceLate) warning = true;
                     else endTime = DateTime.ParseExact($"{timeConfigs[worker][day]!.HourEnd}:{timeConfigs[worker][day]!.MinuteEnd}", "HH:mm", CultureInfo.InvariantCulture);
                 }
 
@@ -106,7 +107,7 @@ class ExportWindowViewModel {
             if(timeConfigs[worker][day] != null) {
                 int difference = (unmatchedCheck.time.Hour - int.Parse(timeConfigs[worker][day]!.HourStart)) * 60
                     + unmatchedCheck.time.Minute - int.Parse(timeConfigs[worker][day]!.MinuteStart);
-                if(Math.Abs(difference) > tolerance) warning = true;
+                if(-difference > toleranceEarly || difference > toleranceLate) warning = true;
             }
 
             writeUnmatched?.Invoke(log, worker.firstName + " " + worker.lastName, unmatchedCheck.time, warning);

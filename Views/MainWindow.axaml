@@ -23,8 +23,8 @@
 
         <Border Grid.Column="0" Grid.Row="0" BorderBrush="Gray" BorderThickness="0, 0, 1, 0" >
             <DockPanel Margin="10 10 10 10">
-                <Button FontSize="{Binding fontSize}" DockPanel.Dock="Top" HorizontalAlignment="Center" Command="{Binding showActiveEmplyees}"> Na Poslu </Button>
-                <Button FontSize="{Binding fontSize}" DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Center" Command="{Binding logIn}" CommandParameter="{Binding $parent[Window]}"> Uloguj se </Button> 
+                <Button Focusable="false" FontSize="{Binding fontSize}" DockPanel.Dock="Top" HorizontalAlignment="Center" Command="{Binding showActiveEmplyees}"> Na Poslu </Button>
+                <Button Focusable="false" FontSize="{Binding fontSize}" DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Center" Command="{Binding logIn}" CommandParameter="{Binding $parent[Window]}"> Uloguj se </Button> 
             </DockPanel>
         </Border>
     </Grid>

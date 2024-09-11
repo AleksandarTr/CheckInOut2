@@ -18,7 +18,8 @@ public class DatabaseInterface {
         lastName Text NOT NULL,
         chip Text NOT NULL,
         hourlyRate Real NOT NULL,
-        timeConfig Integer NOT NULL)";
+        timeConfig Integer NOT NULL
+        salary Real NOT NULL)";
 
     private const string logsCreate = @"
         Create Table Logs(
@@ -93,6 +94,13 @@ public class DatabaseInterface {
             addTimeConfigColumn.ExecuteNonQuery();
         }
         catch(SqliteException) {}
+
+        try {
+            SqliteCommand addTimeConfigColumn = connection.CreateCommand();
+            addTimeConfigColumn.CommandText = "Alter table Employees add column salary Real NOT NULL DEFAULT (0)";
+            addTimeConfigColumn.ExecuteNonQuery();
+        }
+        catch(SqliteException) {}
     }
 
     private bool checkDatabase() {
@@ -142,7 +150,7 @@ public class DatabaseInterface {
         catch (SqliteException){ updateDatabase(); }
 
         SqliteCommand checkEmplyeesTable = connection.CreateCommand();
-        checkEmplyeesTable.CommandText = "Select id, firstName, lastName, chip, hourlyRate, timeConfig from Employees";
+        checkEmplyeesTable.CommandText = "Select id, firstName, lastName, chip, hourlyRate, timeConfig, salary from Employees";
         try { checkEmplyeesTable.ExecuteNonQuery(); }
         catch (SqliteException){ updateDatabase(); }
 
@@ -238,7 +246,7 @@ public class DatabaseInterface {
         return 0;
     }
 
-    public bool addWorker(string firstName, string lastName, string chip, float hourlyRate, int timeConfig, ref string error) {
+    public bool addWorker(string firstName, string lastName, string chip, float hourlyRate, int timeConfig, float salary, ref string error) {
         SqliteCommand checkNameMatchCommand = connection.CreateCommand();
         checkNameMatchCommand.CommandText = "Select id from Employees where firstName = $firstName and lastName = $lastName";
         checkNameMatchCommand.Parameters.AddWithValue("firstName", firstName);
@@ -258,13 +266,14 @@ public class DatabaseInterface {
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Warning).ShowAsync();
 
         SqliteCommand addCommand = connection.CreateCommand();
-        addCommand.CommandText = @"Insert into Employees (firstName, lastName, chip, hourlyRate, timeConfig) 
-            values ($firstName, $lastName, $chip, $hourlyRate, $timeConfig)";
+        addCommand.CommandText = @"Insert into Employees (firstName, lastName, chip, hourlyRate, timeConfig, salary) 
+            values ($firstName, $lastName, $chip, $hourlyRate, $timeConfig, $salary)";
         addCommand.Parameters.AddWithValue("firstName", firstName);
         addCommand.Parameters.AddWithValue("lastName", lastName);
         addCommand.Parameters.AddWithValue("chip", chip);
         addCommand.Parameters.AddWithValue("hourlyRate", hourlyRate);
         addCommand.Parameters.AddWithValue("timeConfig", timeConfig);
+        addCommand.Parameters.AddWithValue("salary", salary);
         if(addCommand.ExecuteNonQuery() == 0) {
             error = "Nije mogao da bude dodat radnik.";
             return false;
@@ -272,7 +281,7 @@ public class DatabaseInterface {
         return true;
     }
     
-    public bool editWorker(int id, string firstName, string lastName, string chip, float hourlyRate, int timeConfig, ref string error) {
+    public bool editWorker(int id, string firstName, string lastName, string chip, float hourlyRate, int timeConfig, float salary, ref string error) {
         SqliteCommand checkNameMatchCommand = connection.CreateCommand();
         checkNameMatchCommand.CommandText = "Select id from Employees where firstName = $firstName and lastName = $lastName";
         checkNameMatchCommand.Parameters.AddWithValue("firstName", firstName);
@@ -295,12 +304,13 @@ public class DatabaseInterface {
 
         SqliteCommand workerUpdateCommand = connection.CreateCommand();
         workerUpdateCommand.CommandText = @"Update Employees set firstName = $firstName, lastName = $lastName, chip = $chip, 
-            hourlyRate = $hourlyRate, timeConfig = $timeConfig where id = $id";
+            hourlyRate = $hourlyRate, timeConfig = $timeConfig, salary = $salary where id = $id";
         workerUpdateCommand.Parameters.AddWithValue("firstName", firstName);
         workerUpdateCommand.Parameters.AddWithValue("lastName", lastName);
         workerUpdateCommand.Parameters.AddWithValue("chip", chip);
         workerUpdateCommand.Parameters.AddWithValue("hourlyRate", hourlyRate);
         workerUpdateCommand.Parameters.AddWithValue("timeConfig", timeConfig);
+        workerUpdateCommand.Parameters.AddWithValue("salary", salary);
         workerUpdateCommand.Parameters.AddWithValue("id", id);
         if(workerUpdateCommand.ExecuteNonQuery() == 0) {
             error = $"Nije pronađen radnik s id-om {id}";
@@ -314,7 +324,7 @@ public class DatabaseInterface {
         List<Worker> workers = new List<Worker>();
 
         SqliteCommand workerFetcherCommand = connection.CreateCommand();
-        workerFetcherCommand.CommandText = "Select id, firstName, lastName, chip, hourlyRate, timeConfig from Employees";
+        workerFetcherCommand.CommandText = "Select id, firstName, lastName, chip, hourlyRate, timeConfig, salary from Employees";
         SqliteDataReader workerFetcher = workerFetcherCommand.ExecuteReader();
         while(workerFetcher.Read()) 
             workers.Add(new Worker() {
@@ -323,7 +333,8 @@ public class DatabaseInterface {
                 lastName = workerFetcher.GetString(2),
                 chip = workerFetcher.GetString(3),
                 hourlyRate = workerFetcher.GetFloat(4),
-                timeConfig = workerFetcher.GetInt32(5)
+                timeConfig = workerFetcher.GetInt32(5),
+                salary = workerFetcher.GetFloat(6)
             });
 
         return workers;

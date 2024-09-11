@@ -7,6 +7,7 @@ public class Worker {
     public string chip = "";
     public float hourlyRate = 0;
     public int timeConfig = 0;
+    public float salary = 0;
 
     public override bool Equals(object? obj)
     {

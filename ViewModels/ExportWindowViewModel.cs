@@ -29,10 +29,16 @@ class ExportWindowViewModel {
     private delegate void WriteDate(StreamWriter log, DateTime date);
     private delegate void WriteUmatched(StreamWriter log, string name, DateTime time, bool warning);
     private delegate void WriteMatched(StreamWriter log, string name, DateTime start, DateTime end, bool warning);
-    private delegate void WriteHours(StreamWriter log, string name, int minutes, float hourlyRate);
+    private delegate void WriteHours(StreamWriter log, string name, int minutes, int expectedMinutes, float hourlyRate, float salary);
 
-    private void export(List<Check> checks, string fileName, string extension, WriteDate? writeDate, WriteUmatched? writeUnmatched, WriteMatched? writeMatched,
+    private void export(List<Check> checks, DateTime exportDate, string extension, ExportPeriod period, WriteDate? writeDate, WriteUmatched? writeUnmatched, WriteMatched? writeMatched,
      Action<StreamWriter>? writeLogStart, Action<StreamWriter>? writeHoursStart, WriteHours? writeHours) {
+        string fileName = period switch {
+            ExportPeriod.Year => exportDate.ToString("yyyy"),
+            ExportPeriod.Month => exportDate.ToString("yyyy-MM"),
+            _ => exportDate.ToString("yyyy-MM-dd"),
+        };
+        
         if(!Directory.Exists("izvestaji")) Directory.CreateDirectory("izvestaji");
         StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}-dnevnik.{extension}");
 
@@ -55,7 +61,7 @@ class ExportWindowViewModel {
             if (check.time.Date != date.Date) {
                 foreach (Check unmatchedCheck in unmatched) {
                     Worker worker = unmatchedCheck.worker;
-                    int day = unmatchedCheck.time.DayOfWeek != DayOfWeek.Sunday ? (int) unmatchedCheck.time.DayOfWeek - 1 : 6;
+                    int day = getDay(unmatchedCheck.time);
                     bool warning = false;
                     if(timeConfigs[worker][day] != null) {
                         int difference = (unmatchedCheck.time.Hour - int.Parse(timeConfigs[worker][day]!.HourStart)) * 60
@@ -75,7 +81,7 @@ class ExportWindowViewModel {
             if(match == null) unmatched.Add(check);
             else {
                 Worker worker = match.worker;
-                int day = match.time.DayOfWeek != DayOfWeek.Sunday ? (int) match.time.DayOfWeek - 1 : 6;
+                int day = getDay(match.time);
                 bool warning = false;
                 DateTime startTime = match.time;
                 DateTime endTime = check.time;
@@ -102,7 +108,7 @@ class ExportWindowViewModel {
 
         foreach (Check unmatchedCheck in unmatched){
             Worker worker = unmatchedCheck.worker;
-            int day = unmatchedCheck.time.DayOfWeek != DayOfWeek.Sunday ? (int) unmatchedCheck.time.DayOfWeek - 1 : 6;
+            int day = getDay(unmatchedCheck.time);
             bool warning = false;
             if(timeConfigs[worker][day] != null) {
                 int difference = (unmatchedCheck.time.Hour - int.Parse(timeConfigs[worker][day]!.HourStart)) * 60
@@ -119,9 +125,55 @@ class ExportWindowViewModel {
         StreamWriter hours = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}-sati.{extension}");
         writeHoursStart?.Invoke(hours);
         foreach(KeyValuePair<Worker, int> entry in minutes.OrderBy(entry => entry.Key.firstName + entry.Key.lastName)) 
-            writeHours?.Invoke(hours, entry.Key.firstName + " " + entry.Key.lastName, entry.Value, entry.Key.hourlyRate);
+            writeHours?.Invoke(hours, entry.Key.firstName + " " + entry.Key.lastName, entry.Value, getExpectedWorkTime(entry.Key, period, exportDate, out float expectedSalary), entry.Key.hourlyRate, expectedSalary);
         hours.Close();
         Logger.log($"Exported {extension} hour log");
+    }
+
+    private int getDay(DateTime date) {
+        return date.DayOfWeek == DayOfWeek.Sunday ? 6 : (int) date.DayOfWeek - 1;
+    }
+
+    private int getExpectedWorkTimeInMonth(TimeConfig?[] timeConfigs, int year, int month) {
+        int expectedMinutes = 0;
+        int days = DateTime.DaysInMonth(year, month);
+        for(int i = 1; i <= days; i++) {
+            int dayOfMonth = getDay(new DateTime(year, month, i));
+            if(timeConfigs[dayOfMonth] == null) continue;
+            TimeConfig config = timeConfigs[dayOfMonth]!;
+            expectedMinutes += (int.Parse(config.HourEnd) - int.Parse(config.HourStart)) * 60 + int.Parse(config.MinuteEnd) - int.Parse(config.MinuteStart);
+        }
+
+        return expectedMinutes;
+    }
+
+    private int getExpectedWorkTime(Worker worker, ExportPeriod period, DateTime date, out float expectedSalary) {
+        TimeConfig?[] timeConfigs = new TimeConfig?[7];
+        for(int i = 0; i < 7; i++) timeConfigs[i] = db.GetTimeConfig(worker.timeConfig, i);
+
+        if(period == ExportPeriod.Year) {
+            int result = 0;
+            for(int i = 1; i <= 12; i++) result += getExpectedWorkTimeInMonth(timeConfigs, date.Year, i);
+            expectedSalary = worker.salary * 12;
+            return result;
+        }
+
+        int expectedMinutes = getExpectedWorkTimeInMonth(timeConfigs, date.Year, date.Month);
+        if(period == ExportPeriod.Month) {
+            expectedSalary = worker.salary;
+            return expectedMinutes;
+        }
+
+        int day = getDay(date);
+        if(timeConfigs[day] == null) {
+            expectedSalary = 0;
+            return 0;
+        }
+
+        TimeConfig config = timeConfigs[day]!;
+        int expectedTime = (int.Parse(config.HourEnd) - int.Parse(config.HourStart)) * 60 + int.Parse(config.MinuteEnd) - int.Parse(config.MinuteStart);
+        expectedSalary = 1f * expectedTime / expectedMinutes * worker.salary;
+        return expectedTime;
     }
 
     public void exportClick() {
@@ -151,27 +203,23 @@ class ExportWindowViewModel {
         }
         else period = ExportPeriod.Day;
 
-        string fileName = period switch {
-            ExportPeriod.Year => $"{_year:0000}",
-            ExportPeriod.Month => $"{_year:0000}-{_month:00}",
-            _ => $"{_year:0000}-{_month:00}-{_day:00}",
-        };
-
+        DateTime date = new DateTime(_year, _month, _day);
         List<Check> checks = db.getChecks(new DateTime(_year, _month, _day), period);
+
         switch(format) {
-            case 0: export(checks, fileName, "txt",
+            case 0: export(checks, date, "txt", period,
                 (log, date) => log.WriteLine($"\n{date:dd.MM.yyyy}\n"), 
                 (log, name, time, warning) => log.WriteLine($"{(warning ? " !!! " : "")}{name} {time:HH:mm}-...\n"),
                 (log, name, start, end, warning) => log.WriteLine($"{(warning ? " !!! " : "")}{name} {start:HH:mm}-{end:HH:mm}"), null, null,
-                (log, name, minutes, hourlyRate) => log.WriteLine($"{name} {minutes / 60}h {minutes % 60}m - {minutes / 60f * hourlyRate}"));
+                (log, name, minutes, expectedMinutes, hourlyRate, salary) => log.WriteLine($"{name} {minutes / 60}h {minutes % 60}m - {salary + (minutes - expectedMinutes) / 60f * hourlyRate}"));
                 break;
-            case 1: export(checks, fileName, "csv", 
+            case 1: export(checks, date, "csv", period,
                 (log, date) => log.WriteLine(),
                 (log, name, time, warning) => log.WriteLine($"{(warning ? "!!!" : "")},{name},{time:HH:mm},,{time:dd.MM.yyyy}"),
                 (log, name, start, end, warning) => log.WriteLine($"{(warning ? "!!!" : "")},{name},{start:HH:mm},{end:HH:mm},{start:dd.MM.yyyy}"),
                 (log) => log.WriteLine("Odstupanje,Ime i prezime,došao,otišao,datum"),
                 (log) => log.WriteLine("Ime i prezime,sati,minuti,plata"),
-                (log, name, minutes, hourlyRate) => log.WriteLine($"{name},{minutes / 60},{minutes % 60},{minutes / 60f * hourlyRate}"));
+                (log, name, minutes, expectedMinutes, hourlyRate, salary) => log.WriteLine($"{name},{minutes / 60},{minutes % 60},{salary + (minutes - expectedMinutes) / 60f * hourlyRate}"));
                 break;
             default: throw new ArgumentException("Invalid format selected.");
         };

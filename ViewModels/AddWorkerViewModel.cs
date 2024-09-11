@@ -16,6 +16,7 @@ partial class AddWorkerWindowViewModel : ObservableObject {
     public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
     public string hourlyRate {get;set;} = "";
     public int timeConfig {get; set;} = -1;
+    public string salary {get; set;} = "";
     public ObservableCollection<string> timeConfigs {get; set;} = new ObservableCollection<string>();
     private List<int> timeConfigIDs;
     private DatabaseInterface db;
@@ -24,8 +25,8 @@ partial class AddWorkerWindowViewModel : ObservableObject {
         string[] chipParts = chip.Split(' ');
         string error = "Nijedno polje ne može da bude prazno!";
 
-        if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !float.TryParse(hourlyRate, out float hourlyRateVal)
-            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.addWorker(firstName, lastName, chipParts[1], hourlyRateVal, timeConfigIDs[timeConfig], ref error)) {
+        if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !float.TryParse(hourlyRate, out float hourlyRateVal) || !float.TryParse(salary, out float salaryVal)
+            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.addWorker(firstName, lastName, chipParts[1], hourlyRateVal, timeConfigIDs[timeConfig], salaryVal, ref error)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", error, 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             Logger.log($"Failed to add worker({firstName},{lastName},{chipParts[1]}):{error}");

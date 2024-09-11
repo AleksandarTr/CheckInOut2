@@ -6,123 +6,74 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using MsBox.Avalonia;
 using CheckInOut2.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CheckInOut2.ViewModels;
 
-class EditWorkerWindowViewModel : INotifyPropertyChanged {
+partial class EditWorkerWindowViewModel : ObservableObject {
+    [ObservableProperty]
     private string _firstName = "";
-
-    public string firstName
-    {
-        get => _firstName;
-        set
-        {
-            if (_firstName != value)
-            {
-                _firstName = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    [ObservableProperty]
     private string _lastName = "";
-    public string lastName {
-        get => _lastName;
-        set
-        {
-            if (_lastName != value)
-            {
-                _lastName = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    [ObservableProperty]
     private string _chip = "";
-    public string chip {
-        get => _chip;
-        set
-        {
-            if (_chip != value)
-            {
-                _chip = value;
-                OnPropertyChanged();
-            }
-        }
-    }
     private ObservableCollection<String> _names;
     public ObservableCollection<String> names { 
         get { return _names; }
         private set { _names = value; }
     }
-
+    [ObservableProperty]
     private int _worker = -1;
-    public int worker {get {return _worker;}
-     set {
-        _worker = value;
-        if(value >= 0 && value < _names.Count) workerSelected();
-        }}
     private DatabaseInterface db;
     private List<Worker> workers;
     public int fontSize {get; set;} = int.Parse(Settings.get("fontSize")!);
+    [ObservableProperty]
     private string _hourlyRate = "";
-    public string hourlyRate {
-        get => _hourlyRate; 
-        set {
-            _hourlyRate = value;
-            OnPropertyChanged();
-            }}
-    private int _timeConfig = -1;
-    public int timeConfig {
-        get => _timeConfig; 
-        set {
-            _timeConfig = value;
-            OnPropertyChanged();
-            }}    
+    [ObservableProperty]
+    private int _timeConfig = -1; 
+    [ObservableProperty]
+    private string _salary = "";
     private List<int> timeConfigIDs;
     public ObservableCollection<string> timeConfigs {get; private set;} = new ObservableCollection<string>();
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public void workerSelected() {
-        firstName = workers[worker].firstName;
-        lastName = workers[worker].lastName;
-        chip = "Čip: " + workers[worker].chip;
-        hourlyRate = workers[worker].hourlyRate.ToString();
-        timeConfig = timeConfigIDs.FindIndex(time => time == workers[worker].timeConfig);
-        Logger.log($"Worker selected: {names[worker]}");
+    partial void OnWorkerChanged(int oldValue, int newValue) {
+        FirstName = workers[newValue].firstName;
+        LastName = workers[newValue].lastName;
+        Chip = "Čip: " + workers[newValue].chip;
+        HourlyRate = workers[newValue].hourlyRate.ToString();
+        TimeConfig = timeConfigIDs.FindIndex(time => time == workers[newValue].timeConfig);
+        Salary = workers[newValue].salary.ToString();
+        Logger.log($"Worker selected: {names[newValue]}");
     }
 
     public void saveWorker() {
-        string[] chipParts = chip.Split(' ');
+        string[] chipParts = Chip.Split(' ');
         string error = "Nijedno polje ne može da bude prazno!";
-        if(chipParts.Length <= 1 || firstName.Length == 0 || lastName.Length == 0 || !float.TryParse(hourlyRate, out float hourlyRateVal)
-            || timeConfig < 0 || timeConfig >= timeConfigs.Count || !db.editWorker(workers[worker].id, firstName, lastName, chipParts[1], hourlyRateVal, timeConfigIDs[timeConfig], ref error)) {
+        if(chipParts.Length <= 1 || FirstName.Length == 0 || LastName.Length == 0 || !float.TryParse(HourlyRate, out float hourlyRateVal) || !float.TryParse(Salary, out float salaryVal)
+            || TimeConfig < 0 || TimeConfig >= timeConfigs.Count || !db.editWorker(workers[Worker].id, FirstName, LastName, chipParts[1], hourlyRateVal, timeConfigIDs[TimeConfig], salaryVal, ref error)) {
             MessageBoxManager.GetMessageBoxStandard("Greška", error, 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
-            Logger.log($"Failed saving({firstName},{lastName},{chip}): {error}");
+            Logger.log($"Failed saving({FirstName},{LastName},{Chip}): {error}");
         }
         else {
-            Logger.log($"Changed worker from ({workers[worker].firstName},{workers[worker].lastName},{workers[worker].chip}) to ({firstName},{lastName},{chipParts[1]})");
-            MessageBoxManager.GetMessageBoxStandard("Izmenjen", $"Uspešno je izmenjen radnik i sada je {firstName} {lastName} sa brojem čipa {chipParts[1]}.", 
+            Logger.log($"Changed worker from ({workers[Worker].firstName},{workers[Worker].lastName},{workers[Worker].chip}) to ({FirstName},{LastName},{chipParts[1]})");
+            MessageBoxManager.GetMessageBoxStandard("Izmenjen", $"Uspešno je izmenjen radnik i sada je {FirstName} {LastName} sa brojem čipa {chipParts[1]}.", 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
-            int index = worker;
-            workers[index].firstName = firstName;
-            workers[index].lastName = lastName;
+            int index = Worker;
+            workers[index].firstName = FirstName;
+            workers[index].lastName = LastName;
             workers[index].chip = chipParts[1];
             workers[index].hourlyRate = hourlyRateVal;
-            workers[index].timeConfig = timeConfigIDs[timeConfig];
-            _names[index] = firstName + " " + lastName;
-            worker = index;
+            workers[index].timeConfig = timeConfigIDs[TimeConfig];
+            workers[index].salary = salaryVal;
+            _names[index] = FirstName + " " + LastName;
+            Worker = index;
         }
     }
 
     private void updateTimeConfigs() {
         timeConfigs.Clear();
-        TimeConfig.ToStrings(db.GetTimeConfigs(), out timeConfigIDs).ForEach(timeConfigs.Add);
+        Models.TimeConfig.ToStrings(db.GetTimeConfigs(), out timeConfigIDs).ForEach(timeConfigs.Add);
     }
 
     public void addTimeConfig(EditWorkerWindow view) {

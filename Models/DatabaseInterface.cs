@@ -103,6 +103,26 @@ public class DatabaseInterface {
         catch(SqliteException) {}
     }
 
+    private void updateOldLogs() {
+        SqliteCommand oldLogFetcherCommand = connection.CreateCommand();
+        oldLogFetcherCommand.CommandText = "select id, time from Logs where time LIKE \"%.____-%\"";
+        SqliteDataReader fetcher = oldLogFetcherCommand.ExecuteReader();
+
+        while(fetcher.Read()) {
+            int id = fetcher.GetInt32(0);
+            string[] dateTime = fetcher.GetString(1).Split('-');
+            string[] date = dateTime[0].Split('.');
+            string[] time = dateTime[1].Split(':');
+
+            string newTime = $"{int.Parse(date[2]):0000}.{int.Parse(date[1]):00}.{int.Parse(date[0]):00}-{int.Parse(time[0]):00}:{int.Parse(time[1]):00}";
+            SqliteCommand oldLogUpdater = connection.CreateCommand();
+            oldLogUpdater.CommandText = "Update Logs set time = $time where id = $id";
+            oldLogUpdater.Parameters.AddWithValue("id", id);
+            oldLogUpdater.Parameters.AddWithValue("time", newTime);
+            oldLogUpdater.ExecuteNonQuery();
+        }
+    }
+
     private bool checkDatabase() {
         SqliteCommand checkerCommand = connection.CreateCommand();
         checkerCommand.CommandText = "SELECT name from sqlite_master";
@@ -154,6 +174,7 @@ public class DatabaseInterface {
         try { checkEmplyeesTable.ExecuteNonQuery(); }
         catch (SqliteException){ updateDatabase(); }
 
+        updateOldLogs();
         return result;
     }
 

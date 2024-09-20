@@ -13,19 +13,19 @@
         
     <Border BorderThickness="1 0 1 1" BorderBrush="Gray">
         <StackPanel>
-            <ComboBox SelectedIndex="{Binding user}" ItemsSource="{Binding users}" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <TextBox Text="{Binding username}" Watermark="Korisničko ime" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <ComboBox SelectedIndex="{Binding User}" ItemsSource="{Binding users}" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <TextBox Text="{Binding Username}" Watermark="Korisničko ime" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
             <TextBox Text="{Binding password}" PasswordChar="*" Watermark="Šifra" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <TextBlock Name="chip" Text="{Binding chip}" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding addWorker}" Content="Dodaj radnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding checkWorker}" Content="Čekiraj radnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding editWorker}" Content="Podesi radnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding export}" Content="Izvezi aktivnosti" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding editCheck}" Content="Izmeni čekiranje" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding addUser}" Content="Dodaj korisnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding editUser}" Content="Izmeni korisnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding settings}" Content="Podešavanja" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
-            <CheckBox IsChecked="{Binding close}" Content="Zatvori program" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <TextBlock Name="chip" Text="{Binding Chip}" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding AddWorker}" Content="Dodaj radnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding CheckWorker}" Content="Čekiraj radnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding EditWorker}" Content="Podesi radnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding Export}" Content="Izvezi aktivnosti" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding EditCheck}" Content="Izmeni čekiranje" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding AddUser}" Content="Dodaj korisnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding EditUser}" Content="Izmeni korisnika" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding Settings}" Content="Podešavanja" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
+            <CheckBox IsChecked="{Binding Close}" Content="Zatvori program" FontSize="{Binding fontSize}" Width="300" Margin="10 5 10 5"/>
             <Button Content="Sačuvaj" HorizontalAlignment="Center" FontSize="{Binding fontSize}" Margin="10 5 10 5" Command="{Binding saveUser}"/>
         </StackPanel>
     </Border>

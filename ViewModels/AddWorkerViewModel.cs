@@ -18,7 +18,7 @@ partial class AddWorkerWindowViewModel : ObservableObject {
     public int timeConfig {get; set;} = -1;
     public string salary {get; set;} = "";
     public ObservableCollection<string> timeConfigs {get; set;} = new ObservableCollection<string>();
-    private List<int> timeConfigIDs;
+    private List<int> timeConfigIDs = new List<int>();
     private DatabaseInterface db;
 
     public void addWorker() {

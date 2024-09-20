@@ -2,13 +2,12 @@
 using Avalonia.Controls;
 using CheckInOut2.Models;
 using CheckInOut2.Views;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CheckInOut2.ViewModels;
 
 public delegate bool ReaderEventHandler(String message);
 
-public partial class MainWindowViewModel : ObservableObject
+public partial class MainWindowViewModel
 {
     private DatabaseInterface db;
     static private bool adminPanelOpen = false;

@@ -33,7 +33,7 @@ partial class EditWorkerWindowViewModel : ObservableObject {
     private int _timeConfig = -1; 
     [ObservableProperty]
     private string _salary = "";
-    private List<int> timeConfigIDs;
+    private List<int> timeConfigIDs = new List<int>();
     public ObservableCollection<string> timeConfigs {get; private set;} = new ObservableCollection<string>();
 
     partial void OnWorkerChanged(int oldValue, int newValue) {

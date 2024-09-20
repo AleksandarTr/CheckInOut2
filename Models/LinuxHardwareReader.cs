@@ -7,7 +7,6 @@ namespace CheckInOut2.Models;
 
 public class LinuxHardwareReader : PlatformHardwareReader {
     private const int EV_KEY = 0x01;
-    private const int EV_SYN = 0x00;
     private const int O_RDONLY = 0x0000;
     private const int O_NONBLOCK = 0x800;
     private const short POLLIN = 0x0001;

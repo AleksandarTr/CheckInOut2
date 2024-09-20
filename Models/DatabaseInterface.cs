@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using CheckInOut2.ViewModels;
 using Microsoft.Data.Sqlite;
 using MsBox.Avalonia;
@@ -43,6 +45,7 @@ public class DatabaseInterface {
         PRIMARY KEY(id, day))";
 
     private void createDatabase() {
+        Logger.log("Database missing. Creating a new one.");
         String createConnectionString = new SqliteConnectionStringBuilder(connection.ConnectionString){
             Mode = SqliteOpenMode.ReadWriteCreate,
         }.ToString();
@@ -78,6 +81,7 @@ public class DatabaseInterface {
             SqliteCommand addPermissionColumn = connection.CreateCommand();
             addPermissionColumn.CommandText = "Alter table Users add column permission Integer NOT NULL DEFAULT (0)";
             addPermissionColumn.ExecuteNonQuery();
+            Logger.log("Added missing permission column");
         }
         catch(SqliteException) {}
 
@@ -85,6 +89,7 @@ public class DatabaseInterface {
             SqliteCommand addHourlyRateColumn = connection.CreateCommand();
             addHourlyRateColumn.CommandText = "Alter table Employees add column hourlyRate Real NOT NULL DEFAULT (0)";
             addHourlyRateColumn.ExecuteNonQuery();
+            Logger.log("Added missing hourlyRate column");
         }
         catch(SqliteException) {}
 
@@ -92,6 +97,7 @@ public class DatabaseInterface {
             SqliteCommand addTimeConfigColumn = connection.CreateCommand();
             addTimeConfigColumn.CommandText = "Alter table Employees add column timeConfig Integer NOT NULL DEFAULT (0)";
             addTimeConfigColumn.ExecuteNonQuery();
+            Logger.log("Added missing timeConfig column");
         }
         catch(SqliteException) {}
 
@@ -99,6 +105,7 @@ public class DatabaseInterface {
             SqliteCommand addTimeConfigColumn = connection.CreateCommand();
             addTimeConfigColumn.CommandText = "Alter table Employees add column salary Real NOT NULL DEFAULT (0)";
             addTimeConfigColumn.ExecuteNonQuery();
+            Logger.log("Added missing salary column");
         }
         catch(SqliteException) {}
     }
@@ -108,6 +115,7 @@ public class DatabaseInterface {
         oldLogFetcherCommand.CommandText = "select id, time from Logs where time LIKE \"%.____-%\"";
         SqliteDataReader fetcher = oldLogFetcherCommand.ExecuteReader();
 
+        int cnt = 0;
         while(fetcher.Read()) {
             int id = fetcher.GetInt32(0);
             string[] dateTime = fetcher.GetString(1).Split('-');
@@ -120,7 +128,9 @@ public class DatabaseInterface {
             oldLogUpdater.Parameters.AddWithValue("id", id);
             oldLogUpdater.Parameters.AddWithValue("time", newTime);
             oldLogUpdater.ExecuteNonQuery();
+            cnt++;
         }
+        if(cnt > 0) Logger.log($"Detected old log records. Updated {cnt} rows.");
     }
 
     private bool checkDatabase() {
@@ -162,6 +172,7 @@ public class DatabaseInterface {
                 }
                 tableCreationCommand.ExecuteNonQuery();
                 result = false;
+                Logger.log($"Missing {requiredTable.Key} table created");
             }
 
         SqliteCommand checkUserTable = connection.CreateCommand();
@@ -191,7 +202,13 @@ public class DatabaseInterface {
         catch (SqliteException ex) {
             if(ex.SqliteErrorCode == 14) { // Unable to open file
                 if(!File.Exists(location)) createDatabase();
-                else return;//TODO: Add database repair
+                else {
+                    Logger.log("Could not open the database: " + ex);
+                    MessageBoxManager.GetMessageBoxStandard("Greška", "Baza podataka nije mogla da bude otvorena iz nekog razloga.",
+                        MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+                    IClassicDesktopStyleApplicationLifetime desktop = (Application.Current!.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!;
+                    desktop?.Shutdown();
+                }
             }
         }
 

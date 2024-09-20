@@ -31,11 +31,13 @@ partial class AddTimeConfigWindowViewModel : ObservableObject {
     partial void OnTimeConfigChanged(int oldValue, int newValue)
     {
         if(newValue == 0) {
+            Logger.log("Selected add new time config mode");
             ActionText = "Dodaj";
             for(int i = 0; i < 7; i++) empty[i] = false;
             foreach(TimeConfig day in week) day.copy(new TimeConfig() {day = day.day});
         }
         else if(newValue > 0 && newValue < timeConfigs.Count) {
+            Logger.log($"Time config: '{timeConfigs[newValue]}' selected.");
             ActionText = "Sačuvaj";
             foreach(TimeConfig day in week) {
                 TimeConfig? timeConfig = db.GetTimeConfig(ids[newValue - 1], day.day);
@@ -43,11 +45,15 @@ partial class AddTimeConfigWindowViewModel : ObservableObject {
                 empty[day.day] = timeConfig == null;
             }
         }
-        else ActionText = "Izaberite radno vreme";
+        else {
+            Logger.log("Non existent time config selected");
+            ActionText = "Izaberite radno vreme";
+        }
     }
 
     public void actionClick() {
         if(TimeConfig < 0 || TimeConfig >= timeConfigs.Count) {
+            Logger.log("Action failed, wrong value for TimeConfig");
             MessageBoxManager.GetMessageBoxStandard("Greška", "Niste izabrali radno vreme ili opciju za dodavanje novog radnog vremena.",
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
             return;
@@ -61,6 +67,7 @@ partial class AddTimeConfigWindowViewModel : ObservableObject {
             }
 
             if(day.HourStart.Length == 0 || day.HourEnd.Length == 0 || day.MinuteStart.Length == 0 || day.MinuteEnd.Length == 0) {
+                Logger.log($"Action failed, partially filled fields for day {day.day}: {day.HourStart},{day.MinuteStart},{day.HourEnd},{day.MinuteEnd}");
                 MessageBoxManager.GetMessageBoxStandard("Greška", "Ili sva ili nijedno polje za jedan radni dan moraju da budu popunjena.",
                     MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
                 return;
@@ -69,6 +76,7 @@ partial class AddTimeConfigWindowViewModel : ObservableObject {
             if(!int.TryParse(day.HourStart, out int hourStart) || !int.TryParse(day.MinuteStart, out int minuteStart) || !int.TryParse(day.HourEnd, out int hourEnd) || !int.TryParse(day.MinuteEnd, out int minuteEnd) ||
                 hourStart < 0 || hourStart > hourEnd || minuteStart < 0 || minuteStart > 59 || (minuteStart > minuteEnd && hourStart == hourEnd) ||
                 hourEnd < 0 || hourEnd > 23 || minuteEnd < 0 || minuteEnd > 59) {
+                Logger.log($"Action failed, invalid values for day {day.day}: {day.HourStart},{day.MinuteStart},{day.HourEnd},{day.MinuteEnd}");
                 MessageBoxManager.GetMessageBoxStandard("Greška", "U polju mora da bude uneseno validno vreme i kraj smene mora da bude nakon početka.",
                     MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
                 return;
@@ -86,10 +94,12 @@ partial class AddTimeConfigWindowViewModel : ObservableObject {
                 }
             }
 
+            string newTimeConfig = Models.TimeConfig.ToStrings(nonEmpty, out _)[0];
+            Logger.log("New time config added:" + newTimeConfig);
             MessageBoxManager.GetMessageBoxStandard("Dodato", "Uspešno je dodato novo radno vreme.", 
                 MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
 
-            timeConfigs.Add(Models.TimeConfig.ToStrings(nonEmpty, out _)[0]);
+            timeConfigs.Add(newTimeConfig);
             ids.Add(newId);
             return;
         }
@@ -104,7 +114,9 @@ partial class AddTimeConfigWindowViewModel : ObservableObject {
         MessageBoxManager.GetMessageBoxStandard("Izmenjeno", "Uspešno je izmenjeno radno vreme.", 
             MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info).ShowAsync();
 
-        timeConfigs[TimeConfig] = Models.TimeConfig.ToStrings(nonEmpty, out _)[0];
+        string updatedTimeConfig = Models.TimeConfig.ToStrings(nonEmpty, out _)[0];
+        Logger.log($"Time config updated from:{timeConfigs[TimeConfig]} to {updatedTimeConfig}");
+        timeConfigs[TimeConfig] = updatedTimeConfig;
     }
 
     public AddTimeConfigWindowViewModel(DatabaseInterface db) {

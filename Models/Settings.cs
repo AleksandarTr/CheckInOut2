@@ -23,6 +23,7 @@ public static class Settings {
 
         foreach(var setting in defaultSettings)
             if(!settings.ContainsKey(setting.Key)) {
+                Logger.log($"Setting for {setting.Key} was missing so it was set to:{setting.Value}");
                 settings.Add(setting.Key, setting.Value);
                 changed = true;
             }
@@ -43,6 +44,7 @@ public static class Settings {
             if(loadDefaultSettings()) save();
         }
         catch(FileNotFoundException) {
+            Logger.log("Settings file missing, so a new one is being created");
             loadDefaultSettings();
             save();
         }

@@ -65,6 +65,7 @@ public static class ChipReader {
             bufferWaiter = null;
         }
         Dispatcher.UIThread.InvokeAsync(new Action(() => {
+            Logger.log("Read:" + chip.ToString());
             chipReaderEvent?.Invoke(chip.ToString());
         }));
     }

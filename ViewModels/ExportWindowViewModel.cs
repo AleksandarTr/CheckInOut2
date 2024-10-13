@@ -26,22 +26,7 @@ class ExportWindowViewModel {
 
     public int format {get; set; } = 0;
 
-    private delegate void WriteDate(StreamWriter log, DateTime date);
-    private delegate void WriteUmatched(StreamWriter log, string name, DateTime time, bool warning);
-    private delegate void WriteMatched(StreamWriter log, string name, DateTime start, DateTime end, bool warning);
-    private delegate void WriteHours(StreamWriter log, string name, int minutes, int expectedMinutes, float hourlyRate, float salary);
-
-    private void export(List<Check> checks, DateTime exportDate, string extension, ExportPeriod period, WriteDate? writeDate, WriteUmatched? writeUnmatched, WriteMatched? writeMatched,
-     Action<StreamWriter>? writeLogStart, Action<StreamWriter>? writeHoursStart, WriteHours? writeHours) {
-        string fileName = period switch {
-            ExportPeriod.Year => exportDate.ToString("yyyy"),
-            ExportPeriod.Month => exportDate.ToString("yyyy-MM"),
-            _ => exportDate.ToString("yyyy-MM-dd"),
-        };
-        
-        if(!Directory.Exists("izvestaji")) Directory.CreateDirectory("izvestaji");
-        StreamWriter log = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}-dnevnik.{extension}");
-
+    private void export(List<Check> checks, DateTime exportDate, ExportPeriod period, LogBuilder logBuilder) {
         int toleranceEarly = (int) Settings.getInt("toleranceEarly")!;
         int toleranceLate = (int) Settings.getInt("toleranceLate")!;
         DateTime date = DateTime.MinValue;
@@ -56,7 +41,7 @@ class ExportWindowViewModel {
             minutes.Add(worker, 0);
         }
 
-        writeLogStart?.Invoke(log);
+        logBuilder.writeLogStart();
         foreach (Check check in checks) {
             if (check.time.Date != date.Date) {
                 foreach (Check unmatchedCheck in unmatched) {
@@ -69,12 +54,12 @@ class ExportWindowViewModel {
                         if(-difference > toleranceEarly || difference > toleranceLate) warning = true;
                     }
 
-                    writeUnmatched?.Invoke(log, worker.firstName + " " + worker.lastName, unmatchedCheck.time, warning);
+                    logBuilder.writeUnmatched(worker.firstName + " " + worker.lastName, unmatchedCheck.time, warning);
                 }
 
                 date = check.time;
                 unmatched.Clear();
-                writeDate?.Invoke(log, date);
+                logBuilder.writeDate(date);
             }
             
             Check? match = unmatched.Find(unmatchedCheck => unmatchedCheck.worker.id == check.worker.id);
@@ -101,7 +86,7 @@ class ExportWindowViewModel {
                 int time = (endTime.Hour - startTime.Hour) * 60 + endTime.Minute - startTime.Minute;
                 minutes[match.worker] += time;
 
-                writeMatched?.Invoke(log, match.worker.firstName + " " + match.worker.lastName, match.time, check.time, warning);
+                logBuilder.writeMatched(match.worker.firstName + " " + match.worker.lastName, match.time, check.time, warning);
                 unmatched.Remove(match);
             }
         }
@@ -116,18 +101,17 @@ class ExportWindowViewModel {
                 if(-difference > toleranceEarly || difference > toleranceLate) warning = true;
             }
 
-            writeUnmatched?.Invoke(log, worker.firstName + " " + worker.lastName, unmatchedCheck.time, warning);
+            logBuilder.writeUnmatched(worker.firstName + " " + worker.lastName, unmatchedCheck.time, warning);
         }
 
-        log.Close();
-        Logger.log($"Exported {extension} log");
+        logBuilder.saveLogFile();
+        Logger.log($"Exported log");
 
-        StreamWriter hours = File.CreateText($"izvestaji{Path.DirectorySeparatorChar}{fileName}-sati.{extension}");
-        writeHoursStart?.Invoke(hours);
+        logBuilder.writeHoursStart();
         foreach(KeyValuePair<Worker, int> entry in minutes.OrderBy(entry => entry.Key.firstName + entry.Key.lastName)) 
-            writeHours?.Invoke(hours, entry.Key.firstName + " " + entry.Key.lastName, entry.Value, getExpectedWorkTime(entry.Key, period, exportDate, out float expectedSalary), entry.Key.hourlyRate, expectedSalary);
-        hours.Close();
-        Logger.log($"Exported {extension} hour log");
+            logBuilder.writeHours(entry.Key.firstName + " " + entry.Key.lastName, entry.Value, getExpectedWorkTime(entry.Key, period, exportDate, out float expectedSalary), entry.Key.hourlyRate, expectedSalary);
+        logBuilder.saveHoursFile();
+        Logger.log($"Exported hour log");
     }
 
     private int getDay(DateTime date) {
@@ -207,20 +191,8 @@ class ExportWindowViewModel {
         List<Check> checks = db.getChecks(new DateTime(_year, _month, _day), period);
 
         switch(format) {
-            case 0: export(checks, date, "txt", period,
-                (log, date) => log.WriteLine($"\n{date:dd.MM.yyyy}\n"), 
-                (log, name, time, warning) => log.WriteLine($"{(warning ? " !!! " : "")}{name} {time:HH:mm}-...\n"),
-                (log, name, start, end, warning) => log.WriteLine($"{(warning ? " !!! " : "")}{name} {start:HH:mm}-{end:HH:mm}"), null, null,
-                (log, name, minutes, expectedMinutes, hourlyRate, salary) => log.WriteLine($"{name} {minutes / 60}h {minutes % 60}m - {salary + (minutes - expectedMinutes) / 60f * hourlyRate}"));
-                break;
-            case 1: export(checks, date, "csv", period,
-                (log, date) => log.WriteLine(),
-                (log, name, time, warning) => log.WriteLine($"{(warning ? "!!!" : "")},{name},{time:HH:mm},,{time:dd.MM.yyyy}"),
-                (log, name, start, end, warning) => log.WriteLine($"{(warning ? "!!!" : "")},{name},{start:HH:mm},{end:HH:mm},{start:dd.MM.yyyy}"),
-                (log) => log.WriteLine("Odstupanje,Ime i prezime,došao,otišao,datum"),
-                (log) => log.WriteLine("Ime i prezime,sati,minuti,plata"),
-                (log, name, minutes, expectedMinutes, hourlyRate, salary) => log.WriteLine($"{name},{minutes / 60},{minutes % 60},{salary + (minutes - expectedMinutes) / 60f * hourlyRate}"));
-                break;
+            case 0: export(checks, date, period, new TxtBuilder(date, period)); break;
+            case 1: export(checks, date, period, new CsvBuilder(date, period)); break;
             default: throw new ArgumentException("Invalid format selected.");
         };
 

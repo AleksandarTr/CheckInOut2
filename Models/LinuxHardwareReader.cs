@@ -20,8 +20,9 @@ public class LinuxHardwareReader : PlatformHardwareReader {
         public short revents;
     }
 
-    public LinuxHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter, ulong hardwareID)
-     : base(buffer, checkBufferWaiter, hardwareID) {
+    public LinuxHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter)
+     : base(buffer, checkBufferWaiter) {
+        hardwareID = ulong.Parse(Settings.get("readerID")!);
         new Thread(new ThreadStart(ChipReaderHandler)).Start();
      }
 
@@ -167,7 +168,8 @@ public class LinuxHardwareReader : PlatformHardwareReader {
 
                 result.Add(new Device() {
                     name = name ?? "Nepoznato ime",
-                    hardwareID = ulong.Parse(devnode.Replace("/dev/input/event", ""))
+                    hardwareID = ulong.Parse(devnode.Replace("/dev/input/event", "")),
+                    serialNumber = ulong.Parse(devnode.Replace("/dev/input/event", ""))
                 });
             }
 

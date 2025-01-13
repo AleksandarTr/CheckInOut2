@@ -11,7 +11,7 @@ public abstract class PlatformHardwareReader {
     protected byte[] buffer;
     protected byte _bufferPtr = 0;
     protected checkBufferWaiterDelegate checkBufferWaiter;
-    protected readonly ulong hardwareID;
+    protected ulong hardwareID;
     public static PlatformHardwareReader instance {
         get; private set;
     }
@@ -26,6 +26,7 @@ public abstract class PlatformHardwareReader {
     public struct Device {
         public string name;
         public ulong hardwareID;
+        public ulong serialNumber;
     }
 
     public abstract List<Device> getDeviceList();
@@ -37,10 +38,9 @@ public abstract class PlatformHardwareReader {
         Logger.log("Chip reader error:" + error);
     }
 
-    public PlatformHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter, ulong hardwareID) {
+    public PlatformHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter) {
         this.buffer = buffer;
         this.checkBufferWaiter = checkBufferWaiter;
-        this.hardwareID = hardwareID;
         instance = this;
     }
 }

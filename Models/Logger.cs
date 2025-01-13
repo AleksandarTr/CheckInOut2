@@ -14,10 +14,10 @@ public static class Logger {
         logger.AutoFlush = true;
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(loggerTerminateHandler);
         log("");
-        log("Application started at " + DateTime.Now.ToString("dd.MM.yyyy-HH:mm"));
+        log("Application started");
     }
 
     public static void log(string message) {
-        logger.WriteLine(message);
+        logger.WriteLine(DateTime.Now.ToString("dd-MM-yy-HH:mm") + ":" + message);
     }
 }

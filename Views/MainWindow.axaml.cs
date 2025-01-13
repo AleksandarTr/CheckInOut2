@@ -37,7 +37,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(WindowClosingEventArgs e) {
         e.Cancel = true;
-        Logger.log($"Application closed at {DateTime.Now:dd.MM.yyyy-HH:mm}");
+        Logger.log("Application closed");
         base.OnClosing(e);
     }
 

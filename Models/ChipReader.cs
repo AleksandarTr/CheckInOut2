@@ -46,9 +46,9 @@ public static class ChipReader {
 
     static ChipReader() {
         #if WINDOWS
-        new WindowsHardwareReader(buffer, checkBufferWaiter, ulong.Parse(Settings.get("readerID")!));
+        new WindowsHardwareReader(buffer, checkBufferWaiter);
         #elif LINUX
-        new LinuxHardwareReader(buffer, checkBufferWaiter, ulong.Parse(Settings.get("readerID")!));
+        new LinuxHardwareReader(buffer, checkBufferWaiter);
         #endif
     }
 

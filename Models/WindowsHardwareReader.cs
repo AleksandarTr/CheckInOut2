@@ -21,15 +21,17 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     private IntPtr _hwnd;
     private WndProcDelegate wndProcMethod;
 
-    public WindowsHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter, ulong hardwareID)
-     : base(buffer, checkBufferWaiter, hardwareID) {
+    public WindowsHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter)
+     : base(buffer, checkBufferWaiter) {
         _hwnd = FindWindow(null, "CheckInOut2");
         wndProcMethod = WndProc;
         _originalWndProc = SetWindowLongPtr(_hwnd, GWL_WNDPROC, wndProcMethod);
         RegisterRawInput();
         List<Device> devices = getDeviceList();
-        if(!devices.Exists(device => device.hardwareID == ulong.Parse(Settings.get("readerID")!)))
-            raiseError("Izabrani uređaj nije povezan na računar.");
+
+        Device reader = devices.Find(device => device.serialNumber == ulong.Parse(Settings.get("readerID")!));
+        if(reader.name == null) raiseError("Izabrani uređaj nije povezan na računar.");
+        else hardwareID = reader.hardwareID;
     }
 
     [DllImport("user32.dll")]
@@ -146,6 +148,18 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr hObject);
 
+    [DllImport("hid.dll", SetLastError = true)]
+    static extern bool HidD_GetAttributes(IntPtr HidDeviceObject, ref HIDD_ATTRIBUTES Attributes);
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct HIDD_ATTRIBUTES
+    {
+        public int Size;
+        public ushort VendorID;
+        public ushort ProductID;
+        public ushort VersionNumber;
+    }
+
     private string getHumanReadableName(string path) {
         IntPtr HIDHandle = CreateFile(path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
         if(HIDHandle != IntPtr.Zero)
@@ -158,6 +172,21 @@ public class WindowsHardwareReader : PlatformHardwareReader {
             if(name.Length > 0) return name;
         }
         return "Nepoznatno ime";
+    }
+
+    private string getSerialNumber(string path) {
+        IntPtr HIDHandle = CreateFile(path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
+        
+        HIDD_ATTRIBUTES attributes = new HIDD_ATTRIBUTES();
+        attributes.Size = Marshal.SizeOf(attributes);
+
+        if (HidD_GetAttributes(HIDHandle, ref attributes))
+        {
+            Console.WriteLine($"Vendor ID: {attributes.VendorID}, Product ID: {attributes.ProductID}, Version: {attributes.VersionNumber}");
+            return attributes.VendorID.ToString() + attributes.VersionNumber.ToString();
+        }
+
+        return "";
     }
 
     public override List<Device> getDeviceList()
@@ -179,9 +208,12 @@ public class WindowsHardwareReader : PlatformHardwareReader {
             if(nameSize > 0) {
                 StringBuilder deviceName = new StringBuilder((int) nameSize);
                 GetRawInputDeviceInfo(rawDevice.hDevice, RIDI_DEVICENAME, deviceName, ref nameSize);
+
+                string serialNumber = getSerialNumber(deviceName.ToString());
                 devices.Add(new Device() {
                     name = getHumanReadableName(deviceName.ToString()),
-                    hardwareID = (ulong) rawDevice.hDevice
+                    hardwareID = (ulong) rawDevice.hDevice,
+                    serialNumber = serialNumber != "" ? ulong.Parse(serialNumber) : (ulong) rawDevice.hDevice
                 });
             } 
         }

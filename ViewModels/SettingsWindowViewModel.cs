@@ -51,9 +51,9 @@ class SettingsWindowViewModel {
         if(Settings.get("toleranceLate") != toleranceLate) Logger.log($"toleranceLate changed from {Settings.get("toleranceLate")} to {toleranceLate}");
         Settings.set("toleranceLate", toleranceLate);
 
-        string newReaderID = devices[reader].hardwareID.ToString();
+        string newReaderID = devices[reader].serialNumber.ToString();
         if(Settings.get("readerID") != newReaderID) Logger.log($"readerID changed from {Settings.get("readerID")} to {newReaderID}");
-        Settings.set("readerID", devices[reader].hardwareID.ToString());
+        Settings.set("readerID", devices[reader].serialNumber.ToString());
         
         Settings.save();
         Logger.log("Settings saved");
@@ -66,9 +66,10 @@ class SettingsWindowViewModel {
         devices.Sort((device1, device2) => device1.hardwareID > device2.hardwareID ? 1 : -1);
         devices.ForEach(device => readers.Add(device.name));
         string? readerID = Settings.get("readerID");
+
         if(readerID != null) {
-            ulong hDevice = ulong.Parse(readerID);
-            reader = devices.FindIndex(device => device.hardwareID == hDevice);
+            ulong serialNumber = ulong.Parse(readerID);
+            reader = devices.FindIndex(device => device.serialNumber == serialNumber);
         }
     }
 }

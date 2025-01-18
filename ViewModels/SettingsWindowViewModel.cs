@@ -52,8 +52,12 @@ class SettingsWindowViewModel {
         Settings.set("toleranceLate", toleranceLate);
 
         string newReaderID = devices[reader].serialNumber.ToString();
-        if(Settings.get("readerID") != newReaderID) Logger.log($"readerID changed from {Settings.get("readerID")} to {newReaderID}");
-        Settings.set("readerID", devices[reader].serialNumber.ToString());
+
+        if(Settings.get("readerID") != newReaderID) {
+            Logger.log($"readerID changed from {Settings.get("readerID")} to {newReaderID}");
+            Settings.set("readerID", devices[reader].serialNumber.ToString());
+            PlatformHardwareReader.instance.updateHardwareId();
+        }
         
         Settings.save();
         Logger.log("Settings saved");

@@ -33,9 +33,16 @@ public abstract class PlatformHardwareReader {
 
     protected void raiseError(string error) {
         Dispatcher.UIThread.InvokeAsync(new Action(() =>
-            MainWindow.addMessage($"Greška kod čitača:{error}"
+            MainWindow.addMessage($"Greška kod čitača:{error}", "#f73434"
         )));
         Logger.log("Chip reader error:" + error);
+    }
+
+    protected void addMessage(string message) {
+        Dispatcher.UIThread.InvokeAsync(new Action(() =>
+            MainWindow.addMessage($"{message}", "#42d685"
+        )));
+        Logger.log("Chip reader message:" + message);
     }
 
     public PlatformHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter) {
@@ -43,4 +50,6 @@ public abstract class PlatformHardwareReader {
         this.checkBufferWaiter = checkBufferWaiter;
         instance = this;
     }
+
+    public abstract void updateHardwareId();
 }

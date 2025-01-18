@@ -20,7 +20,7 @@ public class DatabaseInterface {
         lastName Text NOT NULL,
         chip Text NOT NULL,
         hourlyRate Real NOT NULL,
-        timeConfig Integer NOT NULL
+        timeConfig Integer NOT NULL,
         salary Real NOT NULL)";
 
     private const string logsCreate = @"

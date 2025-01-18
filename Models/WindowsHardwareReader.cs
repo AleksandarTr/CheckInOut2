@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Management;
 
 namespace CheckInOut2.Models;
 
@@ -17,22 +18,11 @@ public class WindowsHardwareReader : PlatformHardwareReader {
     private const uint FILE_SHARE_READ = 0x00000001;
     private const uint FILE_SHARE_WRITE = 0x00000002;
     private const uint OPEN_EXISTING = 3;
+    private const uint FILE_FLAG_OVERLAPPED = 0x40000000;
     private IntPtr _originalWndProc;
     private IntPtr _hwnd;
     private WndProcDelegate wndProcMethod;
-
-    public WindowsHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter)
-     : base(buffer, checkBufferWaiter) {
-        _hwnd = FindWindow(null, "CheckInOut2");
-        wndProcMethod = WndProc;
-        _originalWndProc = SetWindowLongPtr(_hwnd, GWL_WNDPROC, wndProcMethod);
-        RegisterRawInput();
-        List<Device> devices = getDeviceList();
-
-        Device reader = devices.Find(device => device.serialNumber == ulong.Parse(Settings.get("readerID")!));
-        if(reader.name == null) raiseError("Izabrani uređaj nije povezan na računar.");
-        else hardwareID = reader.hardwareID;
-    }
+    private bool active = false;
 
     [DllImport("user32.dll")]
     private static extern IntPtr FindWindow(string windowClass, string windowName);
@@ -56,18 +46,6 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         public ushort Usage;
         public uint Flags;
         public IntPtr TargetWindow;
-    }
-
-    private void RegisterRawInput()
-    {
-        RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1];
-        rid[0].UsagePage = HID_USAGE_PAGE_GENERIC; // Generic desktop controls
-        rid[0].Usage = HID_USAGE_GENERIC_KEYBOARD; // Keyboard
-        rid[0].Flags = RIDEV_INPUTSINK; // RIDEV_INPUTSINK, get input even when not focused
-        rid[0].TargetWindow = _hwnd; // The handle of the target window
-
-        if (!RegisterRawInputDevices(rid, (uint)rid.Length, (uint)Marshal.SizeOf(rid[0])))
-            raiseError(new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error()).Message);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -101,31 +79,6 @@ public class WindowsHardwareReader : PlatformHardwareReader {
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint GetRawInputData(IntPtr hRawInput, uint uiCommand, IntPtr pData, ref uint pcbSize, uint cbSizeHeader);
-    
-    private IntPtr WndProc (IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam) {
-        if(msg == WM_INPUT && lParam != IntPtr.Zero || _bufferPtr == 100) {
-            uint dwSize = 0;
-            GetRawInputData(lParam, RID_INPUT, IntPtr.Zero, ref dwSize, (uint)Marshal.SizeOf(typeof(RAWINPUTHEADER)));
-            
-            if(dwSize == 0) return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
-            IntPtr rawBuffer = Marshal.AllocHGlobal((int) dwSize);
-
-            if(GetRawInputData(lParam, RID_INPUT, rawBuffer, ref dwSize, (uint)Marshal.SizeOf(typeof(RAWINPUTHEADER))) != dwSize)
-                return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
-            RAWINPUT raw = Marshal.PtrToStructure<RAWINPUT>(rawBuffer);
-
-            if(raw.header.dwType != RIM_TYPEKEYBOARD || (ulong) raw.header.hDevice != hardwareID || raw.keyboard.Message < 2 || raw.keyboard.Message > 11) 
-                return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
-
-            lock(buffer) {
-                if(raw.keyboard.Message == 11) buffer[_bufferPtr++] = 0;
-                else buffer[_bufferPtr++] = (byte)(raw.keyboard.Message - 1);
-                checkBufferWaiter();
-            }
-        }
-
-        return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
-    }
 
     [StructLayout(LayoutKind.Sequential)]
     struct RAWINPUTDEVICELIST {
@@ -160,7 +113,73 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         public ushort VersionNumber;
     }
 
-    private string getHumanReadableName(string path) {
+    public WindowsHardwareReader(byte[] buffer, checkBufferWaiterDelegate checkBufferWaiter)
+     : base(buffer, checkBufferWaiter) {
+        _hwnd = FindWindow(null, "CheckInOut2");
+        wndProcMethod = WndProc;
+        _originalWndProc = SetWindowLongPtr(_hwnd, GWL_WNDPROC, wndProcMethod);
+        RegisterRawInput();
+        List<Device> devices = getDeviceList();
+
+        Device reader = devices.Find(device => device.serialNumber == ulong.Parse(Settings.get("readerID")!));
+        if(reader.name == null) raiseError("Izabrani uređaj nije povezan na računar.");
+        else {
+            hardwareID = reader.hardwareID;
+            active = true;
+        }
+
+        ManagementEventWatcher watcher = new ManagementEventWatcher(
+            new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' AND TargetInstance.Name LIKE '%keyboard%'"));
+
+        watcher.EventArrived += new EventArrivedEventHandler(DeviceInserted);
+        watcher.Start();
+
+        // Query for device removal events
+        ManagementEventWatcher removalWatcher = new ManagementEventWatcher(
+            new WqlEventQuery("SELECT * FROM __InstanceDeletionEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_PnPEntity' AND TargetInstance.Name LIKE '%keyboard%'"));
+
+        removalWatcher.EventArrived += new EventArrivedEventHandler(DeviceRemoved);
+        removalWatcher.Start();
+    }
+
+    private void RegisterRawInput()
+    {
+        RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1];
+        rid[0].UsagePage = HID_USAGE_PAGE_GENERIC; // Generic desktop controls
+        rid[0].Usage = HID_USAGE_GENERIC_KEYBOARD; // Keyboard
+        rid[0].Flags = RIDEV_INPUTSINK; // RIDEV_INPUTSINK, get input even when not focused
+        rid[0].TargetWindow = _hwnd; // The handle of the target window
+
+        if (!RegisterRawInputDevices(rid, (uint)rid.Length, (uint)Marshal.SizeOf(rid[0])))
+            raiseError(new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error()).Message);
+    }
+
+    private IntPtr WndProc (IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam) {
+        if(msg == WM_INPUT && lParam != IntPtr.Zero || _bufferPtr == 100) {
+            uint dwSize = 0;
+            GetRawInputData(lParam, RID_INPUT, IntPtr.Zero, ref dwSize, (uint)Marshal.SizeOf(typeof(RAWINPUTHEADER)));
+            
+            if(dwSize == 0) return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
+            IntPtr rawBuffer = Marshal.AllocHGlobal((int) dwSize);
+
+            if(GetRawInputData(lParam, RID_INPUT, rawBuffer, ref dwSize, (uint)Marshal.SizeOf(typeof(RAWINPUTHEADER))) != dwSize)
+                return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
+            RAWINPUT raw = Marshal.PtrToStructure<RAWINPUT>(rawBuffer);
+
+            if(raw.header.dwType != RIM_TYPEKEYBOARD || (ulong) raw.header.hDevice != hardwareID || raw.keyboard.Message < 2 || raw.keyboard.Message > 11) 
+                return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
+
+            lock(buffer) {
+                if(raw.keyboard.Message == 11) buffer[_bufferPtr++] = 0;
+                else buffer[_bufferPtr++] = (byte)(raw.keyboard.Message - 1);
+                checkBufferWaiter();
+            }
+        }
+
+        return CallWindowProc(_originalWndProc, hwnd, msg, wParam, lParam);
+    }
+
+    private static string getHumanReadableName(string path) {
         IntPtr HIDHandle = CreateFile(path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
         if(HIDHandle != IntPtr.Zero)
         {
@@ -174,17 +193,14 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         return "Nepoznatno ime";
     }
 
-    private string getSerialNumber(string path) {
+    private static string getSerialNumber(string path) {
         IntPtr HIDHandle = CreateFile(path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
         
         HIDD_ATTRIBUTES attributes = new HIDD_ATTRIBUTES();
         attributes.Size = Marshal.SizeOf(attributes);
 
         if (HidD_GetAttributes(HIDHandle, ref attributes))
-        {
-            Console.WriteLine($"Vendor ID: {attributes.VendorID}, Product ID: {attributes.ProductID}, Version: {attributes.VersionNumber}");
             return attributes.VendorID.ToString() + attributes.VersionNumber.ToString();
-        }
 
         return "";
     }
@@ -219,5 +235,34 @@ public class WindowsHardwareReader : PlatformHardwareReader {
         }
 
         return devices;
+    }
+
+    private void DeviceInserted(object sender, EventArrivedEventArgs e)
+    {
+        Device reader = getDeviceList().Find(device => device.serialNumber == ulong.Parse(Settings.get("readerID")!));
+        if(reader.name != null && !active) {
+            addMessage("Čitač je ponovo povezan.");
+            hardwareID = reader.hardwareID;
+            active = true;
+        }
+    }
+
+    private void DeviceRemoved(object sender, EventArrivedEventArgs e)
+    {
+        Device reader = getDeviceList().Find(device => device.serialNumber == ulong.Parse(Settings.get("readerID")!));
+        if(reader.name == null && active) {
+            active = false;
+            raiseError("Čitač više nije povezan na računar.");
+        }
+    }
+
+    override public void updateHardwareId() {
+        Device reader = getDeviceList().Find(device => device.serialNumber == ulong.Parse(Settings.get("readerID")!));
+        if(reader.name != null) {
+            if(!active) addMessage("Čitač je povezan");
+            hardwareID = reader.hardwareID;
+            active = true;
+        }
+        else if(!active) raiseError("Nije bilo moguće povezati čitač");
     }
 }

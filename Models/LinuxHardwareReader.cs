@@ -181,4 +181,9 @@ public class LinuxHardwareReader : PlatformHardwareReader {
         udev_unref(udev);
         return result;
     }
+
+    public override void updateHardwareId()
+    {
+        hardwareID = ulong.Parse(Settings.get("readerID"));
+    }
 }
